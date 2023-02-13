@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LRBee.Utilities\LRBee.Utilities.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -2,26 +2,24 @@
 
 namespace LRBee.GrammarDefinition
 {
-    public class ProductionRule<TSymbol> : IReadOnlyList<Symbol<TSymbol>>
+    public class ProductionRule<TSymbol> : IReadOnlyList<TSymbol>
     {
-        public ProductionRule(TSymbol symbol, IEnumerable<TSymbol> production)
+        private IReadOnlyList<TSymbol> _production;
+
+        public ProductionRule(TSymbol symbol, IReadOnlyList<TSymbol> production)
         {
             Symbol = symbol;
-            Production = production
-                .Select((symbol, pos) => new Symbol<TSymbol>(symbol, this, pos))
-                .ToList();
+            _production = production;
         }
 
         public TSymbol Symbol { get; }
 
-        public IReadOnlyList<Symbol<TSymbol>> Production { get; }
+        public int Count => _production.Count;
 
-        public int Count => Production.Count;
+        public TSymbol this[int index] => _production[index];
 
-        public Symbol<TSymbol> this[int index] => Production[index];
+        public IEnumerator<TSymbol> GetEnumerator() => _production.GetEnumerator();
 
-        public IEnumerator<Symbol<TSymbol>> GetEnumerator() => Production.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => Production.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => _production.GetEnumerator();
     }
 }

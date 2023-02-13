@@ -1,4 +1,6 @@
-﻿namespace LRBee.GrammarDefinition
+﻿using LRBee.Utilities.Extensions;
+
+namespace LRBee.GrammarDefinition
 {
     public class GrammarBuilder<TSymbol>
         where TSymbol : notnull
@@ -9,14 +11,12 @@
 
         public TSymbol Start { get; }
 
-        public IEnumerable<TSymbol> this[TSymbol symbol]
+        public IReadOnlyList<TSymbol> this[TSymbol symbol]
         {
             set
             {
+                var productions = _productions.Get(symbol, () => _productions[symbol] = new());
                 var production = new ProductionRule<TSymbol>(symbol, value);
-
-                if (!_productions.TryGetValue(symbol, out var productions))
-                    _productions.Add(symbol, productions = new());
 
                 productions.Add(production);
             }
@@ -24,7 +24,11 @@
 
         public Grammar<TSymbol> Build()
         {
-            return new Grammar<TSymbol>(Start, _productions);
+            var productions = _productions.ToDictionary(
+                entry => entry.Key,
+                entry => (IReadOnlyList<ProductionRule<TSymbol>>)entry.Value.ToList());
+
+            return new Grammar<TSymbol>(Start, productions);
         }
     }
 }

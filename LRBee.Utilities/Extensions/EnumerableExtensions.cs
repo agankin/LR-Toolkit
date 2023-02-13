@@ -1,4 +1,4 @@
-﻿namespace LRBee.Utilities
+﻿namespace LRBee.Utilities.Extensions
 {
     public static class EnumerableExtensions
     {

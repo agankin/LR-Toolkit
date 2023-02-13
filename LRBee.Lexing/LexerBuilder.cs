@@ -1,4 +1,4 @@
-﻿using LRBee.Utilities;
+﻿using LRBee.Utilities.Extensions;
 
 namespace LRBee.Lexing
 {

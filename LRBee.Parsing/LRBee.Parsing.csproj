@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Optional" Version="4.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LRBee.GrammarDefinition\LRBee.GrammarDefinition.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="DFAutomaton">
+      <HintPath>..\Dependencies\DFAutomaton.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

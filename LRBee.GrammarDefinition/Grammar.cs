@@ -1,4 +1,4 @@
-﻿using LRBee.Utilities.Extensions;
+﻿using Optional.Collections;
 
 namespace LRBee.GrammarDefinition
 {
@@ -16,8 +16,7 @@ namespace LRBee.GrammarDefinition
 
         public TSymbol Start { get; }
 
-        public IReadOnlyList<ProductionRule<TSymbol>> this[TSymbol symbol] => _productions.Get(
-            symbol,
-            Array.Empty<ProductionRule<TSymbol>>);
+        public IReadOnlyList<ProductionRule<TSymbol>> this[TSymbol symbol] =>
+            _productions.GetValueOrNone(symbol).ValueOr(Array.Empty<ProductionRule<TSymbol>>);
     }
 }

@@ -1,33 +1,20 @@
 ﻿namespace LRBee.Lexing
 {
-    public readonly record struct TextInput
+    public readonly record struct TextInput(string Text, int Position = 0)
     {
-        private const int StartPos = 0;
+        public required string Text { get; init; } = Text ?? throw new ArgumentNullException(nameof(Text));
 
-        public TextInput(string text) : this(text, StartPos) { }
+        public required int Position { get; init; } = ValidatePosition(Position, Text);
 
-        public TextInput(string text, int position) =>
-            (Text, Position) = Validate(text, position);
-
-        public string Text { get; init; }
-        
-        public int Position { get; init; }
-
-        private static (string text, int position) Validate(string text, int position)
+        private static int ValidatePosition(int position, string text)
         {
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(Text));
-            }
-
             if (position < 0)
-            {
-                throw new ArgumentException(
-                    $"{nameof(Position)} cannot be less than zero.",
-                    nameof(Position));
-            }
+                throw new ArgumentException($"Value of {nameof(Position)} is less than zero.", nameof(Position));
 
-            return (text, position);
+            if (position > text.Length)
+                throw new ArgumentException($"Value of {nameof(Position)} exceeds text symbols count.", nameof(Position));
+
+            return position;
         }
     }
 }

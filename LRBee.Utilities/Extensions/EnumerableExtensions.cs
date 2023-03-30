@@ -1,4 +1,4 @@
-﻿namespace LRBee.Utilities.Extensions
+﻿namespace LRBee.Utilities
 {
     public static class EnumerableExtensions
     {
@@ -9,7 +9,7 @@
             this IEnumerable<TItem> items,
             Func<TItem, THandlerResult> handler)
         {
-            items.Select(handler).Last();
+            items.Select(handler).LastOrDefault();
         }
 
         public static void ForEach<TItem>(this IEnumerable<TItem> items, Action<TItem, int> handler)

@@ -1,19 +1,29 @@
 ﻿using Optional;
+using Optional.Unsafe;
 
-namespace LRBee.Utilities.Extensions
+namespace LRBee.Utilities
 {
     public static class OptionalExtensions
     {
-        public static bool SomeEquals<TValue>(this Option<TValue> valueOpt, TValue equalsToValue) =>
-            valueOpt.Match(
-                value => EqualityComparer<TValue>.Default.Equals(value, equalsToValue),
-                () => false);
+        public static bool SomeEquals<TValue>(
+            this Option<TValue> valueOption,
+            TValue valueToCompare,
+            IEqualityComparer<TValue>? comparer = null)
+        {
+            comparer = comparer ?? EqualityComparer<TValue>.Default;
 
-        public static IEnumerable<TItem> SelectSome<TItem>(this IEnumerable<Option<TItem>> items) =>
-            items
-                .Where(item => item.Match(_ => true, () => false))
-                .Select(item => item.Match(
-                    value => value,
-                    () => throw new InvalidOperationException("Item must be Some.")));
+            return valueOption
+                .Map(value => comparer.Equals(value, valueToCompare))
+                .ValueOr(false);
+        }
+
+        public static IEnumerable<TResult> OnlySome<TItem, TResult>(
+            this IEnumerable<TItem> items,
+            Func<TItem, Option<TResult>> selector)
+        {
+            return items.Select(selector)
+                .Where(option => option.HasValue)
+                .Select(item => item.ValueOrFailure());
+        }
     }
 }

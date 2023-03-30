@@ -1,25 +1,26 @@
-﻿using System.Collections;
-
-namespace LRBee.GrammarDefinition
+﻿namespace LRBee.GrammarDefinition
 {
-    public class ProductionRule<TSymbol> : IReadOnlyList<TSymbol>
+    public class ProductionRule<TSymbol>
     {
-        private IReadOnlyList<TSymbol> _production;
-
-        public ProductionRule(TSymbol symbol, IReadOnlyList<TSymbol> production)
+        public ProductionRule(TSymbol forSymbol, Production<TSymbol> production)
         {
-            Symbol = symbol;
-            _production = production;
+            ForSymbol = forSymbol;
+            Production = ValidateProduction(production);
         }
 
-        public TSymbol Symbol { get; }
+        public TSymbol ForSymbol { get; }
 
-        public int Count => _production.Count;
+        public Production<TSymbol> Production { get; }
 
-        public TSymbol this[int index] => _production[index];
+        private Production<TSymbol> ValidateProduction(Production<TSymbol> production)
+        {
+            if (production == null)
+                throw new ArgumentNullException(nameof(production));
 
-        public IEnumerator<TSymbol> GetEnumerator() => _production.GetEnumerator();
+            if (production.Count == 0)
+                throw new ArgumentException("Production doesn't contain symbols.", nameof(production));
 
-        IEnumerator IEnumerable.GetEnumerator() => _production.GetEnumerator();
+            return production;
+        }
     }
 }

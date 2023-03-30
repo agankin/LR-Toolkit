@@ -6,6 +6,10 @@ namespace LRBee.GrammarDefinition
     {
         private readonly IList<ProductionRule<TSymbol>> _rules = new List<ProductionRule<TSymbol>>();
 
+        public ProductionRuleCollection(TSymbol forSymbol) => ForSymbol = forSymbol;
+
+        public TSymbol ForSymbol { get; }
+
         public int Count => _rules.Count;
 
         public ProductionRule<TSymbol> this[int index] => _rules[index];

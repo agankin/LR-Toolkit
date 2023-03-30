@@ -2,7 +2,7 @@
 {
     public static class GrammarUtils
     {
-        public static IReadOnlyList<TSymbol> _<TSymbol>(params TSymbol[] symbols)
-            => symbols;
+        public static Production<TSymbol> Prod<TSymbol>(params TSymbol[] symbols)
+            => new Production<TSymbol>(symbols);
     }
 }

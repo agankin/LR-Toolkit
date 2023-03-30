@@ -11,9 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRBee.GrammarDefinition", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRBee.Parsing", "LRBee.Parsing\LRBee.Parsing.csproj", "{B949E1DB-CC36-4AF3-A0D6-D5DD816661F1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRBee.Samples", "Samples\LRBee.Samples\LRBee.Samples.csproj", "{D6DC56AC-0C06-4552-BF65-9B10A30CAB96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Playground", "Playground\Playground.csproj", "{D6DC56AC-0C06-4552-BF65-9B10A30CAB96}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{7CE04BDA-301D-4EE1-979A-ECF18D99D732}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Playground", "Playground", "{7CE04BDA-301D-4EE1-979A-ECF18D99D732}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

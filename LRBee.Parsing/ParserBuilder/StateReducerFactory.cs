@@ -6,11 +6,13 @@ namespace LRBee.Parsing
     {
         public static ParserStateReducer<TSymbol> Shift<TSymbol>(
             Symbol<TSymbol> symbolAhead,
-            ItemSet<TSymbol> afterSymbolFullItemSet)
+            ItemSet<TSymbol> afterSymbolFullItemSet,
+            ShiftListener<TSymbol> listener)
             where TSymbol : notnull
         {
             return (automataRunState, parsingState) =>
             {
+                listener(parsingState, symbolAhead, automataRunState.TransitingTo);
                 var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
 
                 return parsingState with
@@ -26,11 +28,14 @@ namespace LRBee.Parsing
         public static ParserStateReducer<TSymbol> Reduce<TSymbol>(
             Symbol<TSymbol> symbolAhead,
             ItemSet<TSymbol> afterSymbolFullItemSet,
-            Item<TSymbol> reducedItem)
+            Item<TSymbol> reducedItem,
+            ReduceListener<TSymbol> listener)
             where TSymbol : notnull
         {
             return (automataRunState, parsingState) =>
             {
+                listener(parsingState, symbolAhead, reducedItem, automataRunState.TransitingTo);
+
                 var reducedToSymbol = reducedItem.ForSymbol;
                 var reducedSymbolsCount = reducedItem.Production.Count;
                 var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
@@ -56,11 +61,13 @@ namespace LRBee.Parsing
 
         public static ParserStateReducer<TSymbol> Accept<TSymbol>(
             Symbol<TSymbol> symbolAhead,
-            ItemSet<TSymbol> afterSymbolFullItemSet)
+            ItemSet<TSymbol> afterSymbolFullItemSet,
+            AcceptListener<TSymbol> listener)
             where TSymbol : notnull
         {
             return (automataRunState, parsingState) =>
             {
+                listener(parsingState, automataRunState.TransitingTo);
                 var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
 
                 return parsingState with
@@ -71,13 +78,16 @@ namespace LRBee.Parsing
             };
         }
 
-        public static ParserStateReducer<TSymbol> GoToAfterReduce<TSymbol>(TSymbol reducedToSymbol)
+        public static ParserStateReducer<TSymbol> GoToAfterReduce<TSymbol>(
+            TSymbol reducedToSymbol,
+            GoToAfterReduceListener<TSymbol> listener)
             where TSymbol : notnull
         {
             var symbol = Symbol<TSymbol>.Create(reducedToSymbol);
 
             return (automataRunState, parsingState) =>
             {
+                listener(parsingState, symbol, automataRunState.TransitingTo);
                 automataRunState.EmitNext(symbol);
 
                 return parsingState;

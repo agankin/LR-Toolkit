@@ -54,6 +54,19 @@ namespace LRBee.Parsing
 
         public bool HasSymbolsAhead() => Position < Production.Count;
 
+        public override string ToString()
+        {
+            var forSymbol = ForSymbol;
+            var productionSymbols = string.Join(
+                ", ",
+                Production.Select((symbol, idx) => idx == Position
+                    ? $"*{symbol}"
+                    : symbol.ToString() ?? string.Empty));
+            var lastPos = Position == Production.Count ? "*" : string.Empty;
+
+            return $"{forSymbol} -> {productionSymbols}{lastPos}";
+        }
+
         private Option<TResult> ForHasSymbolsAhead<TResult>(Func<TResult> getValue) => HasSymbolsAhead()
             ? getValue().Some()
             : Option.None<TResult>();

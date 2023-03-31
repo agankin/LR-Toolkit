@@ -19,5 +19,12 @@ namespace LRBee.GrammarDefinition
         public IEnumerator<ProductionRule<TSymbol>> GetEnumerator() => _rules.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public override string ToString()
+        {
+            var rules = string.Join(" | ", _rules.Select(rule => $"[{rule.Production}]"));
+
+            return $"{ForSymbol} -> {rules}";
+        }
     }
 }

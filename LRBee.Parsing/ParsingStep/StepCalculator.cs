@@ -7,10 +7,14 @@ namespace LRBee.Parsing
     internal class StepCalculator<TSymbol> where TSymbol : notnull
     {
         private readonly ClosureItemSetGenerator<TSymbol> _closureGenerator;
+        private readonly ParserTransitionsObserver<TSymbol> _observer;
 
-        public StepCalculator(ClosureItemSetGenerator<TSymbol> closureGenerator)
+        public StepCalculator(
+            ClosureItemSetGenerator<TSymbol> closureGenerator,
+            ParserTransitionsObserver<TSymbol> observer)
         {
             _closureGenerator = closureGenerator;
+            _observer = observer;
         }
 
         public Option<Step<TSymbol>, BuilderError> GetForSymbolAhead(
@@ -54,7 +58,7 @@ namespace LRBee.Parsing
 
         private Step<TSymbol> CreateShift(Symbol<TSymbol> symbolAhead, ItemSet<TSymbol> afterSymbolFullItemSet)
         {
-            var shift = StateReducerFactory.Shift(symbolAhead, afterSymbolFullItemSet);
+            var shift = StateReducerFactory.Shift(symbolAhead, afterSymbolFullItemSet, _observer.ShiftListener);
 
             return Step<TSymbol>.CreateShiftStep(symbolAhead, shift, afterSymbolFullItemSet);
         }
@@ -64,14 +68,14 @@ namespace LRBee.Parsing
             ItemSet<TSymbol> afterSymbolFullItemSet,
             Item<TSymbol> reducedItem)
         {
-            var reduce = StateReducerFactory.Reduce(symbolAhead, afterSymbolFullItemSet, reducedItem);
+            var reduce = StateReducerFactory.Reduce(symbolAhead, afterSymbolFullItemSet, reducedItem, _observer.ReduceListener);
             
             return Step<TSymbol>.CreateReduceStep(symbolAhead, reduce, afterSymbolFullItemSet, reducedItem);
         }
 
         private Step<TSymbol> CreateAccept(Symbol<TSymbol> symbolAhead, ItemSet<TSymbol> afterSymbolFullItemSet)
         {
-            var accept = StateReducerFactory.Accept(symbolAhead, afterSymbolFullItemSet);
+            var accept = StateReducerFactory.Accept(symbolAhead, afterSymbolFullItemSet, _observer.AcceptListener);
 
             return Step<TSymbol>.CreateAcceptStep(symbolAhead, accept, afterSymbolFullItemSet);
         }

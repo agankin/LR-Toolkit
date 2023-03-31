@@ -36,6 +36,11 @@ namespace LRBee.Parsing
         public TResult MapSymbol<TResult>(Func<TSymbol, TResult> mapSymbol, Func<TResult> mapEnd) =>
             MapType(mapSymbol, (symbol, _) => mapSymbol(symbol), mapEnd);
 
+        public override string? ToString() => MapType(
+            symbol => symbol?.ToString(),
+            (symbol, goToAfterReduce) => $"{symbol}, GOTO {goToAfterReduce}",
+            () => "$");
+
         private TResult MapType<TResult>(
             Func<TSymbol, TResult> mapSymbol,
             Func<TSymbol, ItemSet<TSymbol>, TResult> mapSymbolReduced,

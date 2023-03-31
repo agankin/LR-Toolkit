@@ -1,6 +1,8 @@
-﻿using LRBee.GrammarDefinition;
+﻿using DFAutomaton.Utils;
+using LRBee.GrammarDefinition;
 using LRBee.Parsing;
-
+using LRBee.Utilities;
+using Playground;
 using static LRBee.GrammarDefinition.GrammarUtils;
 using static Symbol;
 
@@ -11,8 +13,18 @@ var grammar = new GrammarBuilder<Symbol>(S)
     [A] = Prod(b)
 }.Build();
 
-var parserOrError = ParserBuilder<Symbol>.Build(grammar);
-Console.WriteLine(parserOrError);
+var parserOrError = ParserBuilder<Symbol>.Build(grammar, ParserObserver.Configure);
+
+parserOrError.Map(parser =>
+{
+    var formattedGraph = StatesGraphFormatter<Symbol<Symbol>, ParsingState<Symbol>>.Format(parser.StartState);
+    Console.WriteLine(formattedGraph);
+
+    Console.WriteLine("Run Parser:");
+    parser.Run(new[] { a, b, a, b }).MatchNone(error => Console.WriteLine($"Error: {error.Type}"));
+
+    return new VoidValue();
+});
 
 public enum Symbol
 {

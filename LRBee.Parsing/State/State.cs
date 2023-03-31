@@ -16,6 +16,12 @@ namespace LRBee.Parsing
 
         public ItemSet<TSymbol> FullItemSet { get; }
 
+        public object? Tag
+        {
+            get => _dfaState.Tag;
+            set => _dfaState.Tag = value;
+        }
+
         public State<TSymbol> ToNewState(
             Symbol<TSymbol> symbolAhead,
             ItemSet<TSymbol> stateItemSet,
@@ -39,5 +45,7 @@ namespace LRBee.Parsing
         {
             return _dfaState.ToNewAccepted(symbol, reducer);
         }
+
+        public override string? ToString() => _dfaState.ToString();
     }
 }

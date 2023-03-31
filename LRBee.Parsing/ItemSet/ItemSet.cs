@@ -35,5 +35,7 @@ namespace LRBee.Parsing
             obj is ItemSet<TSymbol> other && Equals(other);
 
         public override int GetHashCode() => FNVHash.Get(_items);
+
+        public override string ToString() => string.Join(", ", _items.Select(item => $"[{item}]"));
     }
 }

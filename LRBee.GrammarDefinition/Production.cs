@@ -20,5 +20,7 @@ namespace LRBee.GrammarDefinition
         public IEnumerator<TSymbol> GetEnumerator() => _productionSymbols.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => _productionSymbols.GetEnumerator();
+
+        public override string ToString() => string.Join(", ", _productionSymbols);
     }
 }

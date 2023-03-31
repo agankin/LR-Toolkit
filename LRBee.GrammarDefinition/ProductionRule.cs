@@ -22,5 +22,7 @@
 
             return production;
         }
+
+        public override string ToString() => $"{ForSymbol} -> {Production}";
     }
 }

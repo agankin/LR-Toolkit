@@ -12,10 +12,14 @@ namespace LRBee.Parsing
     {
         private readonly StateForItemSet<TSymbol> _stateForItemSet = new();
         private readonly BuildForNextSymbolsAhead<TSymbol> _buildForNextSymbolsAhead;
+        private readonly ParserTransitionsObserver<TSymbol> _observer;
 
-        public StateForStepBuilder(BuildForNextSymbolsAhead<TSymbol> buildForNextSymbolsAhead)
+        public StateForStepBuilder(
+            BuildForNextSymbolsAhead<TSymbol> buildForNextSymbolsAhead,
+            ParserTransitionsObserver<TSymbol> observer)
         {
             _buildForNextSymbolsAhead = buildForNextSymbolsAhead;
+            _observer = observer;
         }
 
         public Option<BuilderError> BuildStepState(
@@ -48,10 +52,12 @@ namespace LRBee.Parsing
         private Option<BuilderError> BuildAcceptedStepState(State<TSymbol> fromState, Step<TSymbol>.Accept step)
         {
             var symbolAhead = step.SymbolAhead;
+            var afterSymbolFullItemSet = step.AfterSymbolFullItemSet;
 
             var toState = fromState.ToNewAccepted(
                 symbolAhead,
                 (runState, parserState) => step.ParserStateReducer(runState, parserState));
+            toState.Tag = afterSymbolFullItemSet;
 
             return Option.None<BuilderError>();
         }
@@ -68,6 +74,7 @@ namespace LRBee.Parsing
                 symbolAhead,
                 afterSymbolFullItemSet,
                 (runState, parserState) => step.ParserStateReducer(runState, parserState));
+            toState.Tag = afterSymbolFullItemSet;
             
             _stateForItemSet.Add(toState, afterSymbolFullItemSet);
             statesLog = statesLog.Push(toState);
@@ -116,7 +123,9 @@ namespace LRBee.Parsing
 
                 var reducedToSymbol = reducedItem.ForSymbol;
                 var emitedNext = Symbol<TSymbol>.Create(reducedToSymbol, afterReduceState.FullItemSet);
-                var goToAfterReduce = StateReducerFactory.GoToAfterReduce(reducedToSymbol);
+                var goToAfterReduce = StateReducerFactory.GoToAfterReduce(
+                    reducedToSymbol,
+                    _observer.GoToAfterReduceListener);
                 
                 reduceStepState.LinkState(
                     emitedNext,

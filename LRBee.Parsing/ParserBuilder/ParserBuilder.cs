@@ -8,24 +8,31 @@ namespace LRBee.Parsing
     public class ParserBuilder<TSymbol> where TSymbol : notnull
     {
         private readonly Grammar<TSymbol> _grammar;
+        private readonly ParserTransitionsObserver<TSymbol> _observer;
 
         private readonly ClosureItemSetGenerator<TSymbol> _closureGenerator;
         private readonly StepCalculator<TSymbol> _stepCalculator;
         private readonly StateForStepBuilder<TSymbol> _stateForStepBuilder;
 
-        private ParserBuilder(Grammar<TSymbol> grammar)
+        private ParserBuilder(Grammar<TSymbol> grammar, ParserTransitionsObserver<TSymbol> observer)
         {
             _grammar = grammar;
+            _observer = observer;
 
             _closureGenerator = new ClosureItemSetGenerator<TSymbol>(grammar);
             
-            _stepCalculator = new StepCalculator<TSymbol>(_closureGenerator);
-            _stateForStepBuilder = new StateForStepBuilder<TSymbol>(BuildForSymbolsAhead);
+            _stepCalculator = new StepCalculator<TSymbol>(_closureGenerator, _observer);
+            _stateForStepBuilder = new StateForStepBuilder<TSymbol>(BuildForSymbolsAhead, _observer);
         }
 
-        public static Option<Parser<TSymbol>, BuilderError> Build(Grammar<TSymbol> grammar)
+        public static Option<Parser<TSymbol>, BuilderError> Build(
+            Grammar<TSymbol> grammar,
+            Func<ParserTransitionsObserver<TSymbol>, ParserTransitionsObserver<TSymbol>>? configureObserver = null)
         {
-            var builder = new ParserBuilder<TSymbol>(grammar);
+            var emptyObserver = ParserTransitionsObserver<TSymbol>.Create();
+            var observer = configureObserver?.Invoke(emptyObserver) ?? emptyObserver;
+
+            var builder = new ParserBuilder<TSymbol>(grammar, observer);
 
             return builder.Build();
         }
@@ -36,6 +43,7 @@ namespace LRBee.Parsing
             var startItemSet = CreateStartItemSet();
 
             var startState = new State<TSymbol>(automataBuilder.StartState, startItemSet);
+            startState.Tag = startItemSet;
 
             var statesLog = StatesLog<TSymbol>.Empty.Push(startState);
             var errorOption = BuildForSymbolsAhead(startState, statesLog);

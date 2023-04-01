@@ -1,6 +1,6 @@
 ﻿using Optional.Collections;
 
-namespace LRBee.GrammarDefinition
+namespace LRToolkit.GrammarDefinition
 {
     public class GrammarBuilder<TSymbol>
         where TSymbol : notnull

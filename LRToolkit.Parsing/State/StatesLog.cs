@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     public readonly record struct StatesLog<TSymbol> where TSymbol : notnull
     {

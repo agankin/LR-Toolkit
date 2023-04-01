@@ -1,6 +1,6 @@
 ﻿using Optional;
 
-namespace LRBee.Lexing
+namespace LRToolkit.Lexing
 {
     public class Lexer<TToken>
     {

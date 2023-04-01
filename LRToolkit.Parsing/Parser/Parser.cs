@@ -1,7 +1,7 @@
 ﻿using DFAutomaton;
 using Optional;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     public class Parser<TSymbol> where TSymbol : notnull
     {

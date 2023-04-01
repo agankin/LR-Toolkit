@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace LRBee.Utilities
+namespace LRToolkit.Utilities
 {
     public static class StackExtensions
     {

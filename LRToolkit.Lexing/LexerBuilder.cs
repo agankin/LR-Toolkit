@@ -1,6 +1,6 @@
-﻿using LRBee.Utilities;
+﻿using LRToolkit.Utilities;
 
-namespace LRBee.Lexing
+namespace LRToolkit.Lexing
 {
     public class LexerBuilder<TToken>
     {

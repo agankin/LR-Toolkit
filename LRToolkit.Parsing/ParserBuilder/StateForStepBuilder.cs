@@ -1,7 +1,7 @@
-﻿using LRBee.Utilities;
+﻿using LRToolkit.Utilities;
 using Optional;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     internal delegate Option<BuilderError> BuildForNextSymbolsAhead<TSymbol>(
         State<TSymbol> fromState,

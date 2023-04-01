@@ -1,6 +1,6 @@
 ﻿using DFAutomaton;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     internal delegate ParsingState<TSymbol> ParserStateReducer<TSymbol>(
         AutomataRunState<Symbol<TSymbol>, ParsingState<TSymbol>> automataRunState,

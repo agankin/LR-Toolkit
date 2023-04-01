@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Optional;
 
-namespace LRBee.Lexing
+namespace LRToolkit.Lexing
 {
     public static class CommonParsers
     {

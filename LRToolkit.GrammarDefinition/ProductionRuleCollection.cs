@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace LRBee.GrammarDefinition
+namespace LRToolkit.GrammarDefinition
 {
     public class ProductionRuleCollection<TSymbol> : IReadOnlyList<ProductionRule<TSymbol>>
     {

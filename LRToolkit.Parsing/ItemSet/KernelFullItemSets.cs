@@ -1,4 +1,4 @@
-﻿namespace LRBee.Parsing
+﻿namespace LRToolkit.Parsing
 {
     internal readonly record struct KernelFullItemSets<TSymbol>(
         ItemSet<TSymbol> Kernel,

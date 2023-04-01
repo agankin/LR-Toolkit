@@ -1,8 +1,8 @@
-﻿using LRBee.Utilities;
+﻿using LRToolkit.Utilities;
 using Optional;
 using Optional.Unsafe;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     public readonly record struct Symbol<TSymbol> where TSymbol : notnull
     {

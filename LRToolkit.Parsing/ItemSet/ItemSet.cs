@@ -1,7 +1,7 @@
 ﻿using System.Collections;
-using LRBee.Utilities;
+using LRToolkit.Utilities;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     public class ItemSet<TSymbol> : IEquatable<ItemSet<TSymbol>>, IEnumerable<Item<TSymbol>> where TSymbol : notnull
     {

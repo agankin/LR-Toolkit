@@ -1,7 +1,7 @@
-﻿using LRBee.GrammarDefinition;
+﻿using LRToolkit.GrammarDefinition;
 using Optional;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     public record Item<TSymbol> where TSymbol : notnull
     {

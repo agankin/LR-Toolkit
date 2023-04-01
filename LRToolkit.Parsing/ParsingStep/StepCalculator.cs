@@ -2,7 +2,7 @@
 using Optional;
 using Optional.Unsafe;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     internal class StepCalculator<TSymbol> where TSymbol : notnull
     {

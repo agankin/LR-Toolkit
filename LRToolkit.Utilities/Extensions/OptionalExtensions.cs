@@ -1,7 +1,7 @@
 ﻿using Optional;
 using Optional.Unsafe;
 
-namespace LRBee.Utilities
+namespace LRToolkit.Utilities
 {
     public static class OptionalExtensions
     {

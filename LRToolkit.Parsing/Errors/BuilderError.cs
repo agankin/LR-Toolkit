@@ -1,4 +1,4 @@
-﻿namespace LRBee.Parsing
+﻿namespace LRToolkit.Parsing
 {
     public enum BuilderError
     {

@@ -1,4 +1,4 @@
-﻿namespace LRBee.Parsing
+﻿namespace LRToolkit.Parsing
 {
     public readonly record struct ParsedSymbol<TSymbol>
     {

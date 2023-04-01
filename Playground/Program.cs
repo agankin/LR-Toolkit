@@ -1,9 +1,10 @@
 ﻿using DFAutomaton.Utils;
-using LRBee.GrammarDefinition;
-using LRBee.Parsing;
-using LRBee.Utilities;
+using LRToolkit.GrammarDefinition;
+using LRToolkit.Parsing;
+using LRToolkit.Utilities;
 using Playground;
-using static LRBee.GrammarDefinition.GrammarUtils;
+
+using static LRToolkit.GrammarDefinition.GrammarUtils;
 using static Symbol;
 
 var grammar = new GrammarBuilder<Symbol>(S)

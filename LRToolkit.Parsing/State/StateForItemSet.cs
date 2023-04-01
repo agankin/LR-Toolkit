@@ -1,7 +1,7 @@
 ﻿using Optional;
 using Optional.Collections;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     internal class StateForItemSet<TSymbol> where TSymbol : notnull
     {

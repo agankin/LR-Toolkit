@@ -1,6 +1,6 @@
 ﻿using DFAutomaton;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     public delegate void ShiftListener<TSymbol>(
         ParsingState<TSymbol> parsingState,

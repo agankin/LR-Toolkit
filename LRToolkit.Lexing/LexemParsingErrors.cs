@@ -1,4 +1,4 @@
-﻿namespace LRBee.Lexing
+﻿namespace LRToolkit.Lexing
 {
     public class LexemError
     {

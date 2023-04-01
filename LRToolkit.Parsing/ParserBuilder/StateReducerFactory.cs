@@ -1,6 +1,6 @@
-﻿using LRBee.Utilities;
+﻿using LRToolkit.Utilities;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     internal static class StateReducerFactory
     {

@@ -1,7 +1,7 @@
-﻿using LRBee.GrammarDefinition;
-using LRBee.Utilities;
+﻿using LRToolkit.GrammarDefinition;
+using LRToolkit.Utilities;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     public class ClosureItemSetGenerator<TSymbol> where TSymbol : notnull
     {

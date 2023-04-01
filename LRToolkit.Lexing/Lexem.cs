@@ -1,4 +1,4 @@
-﻿namespace LRBee.Lexing
+﻿namespace LRToolkit.Lexing
 {
     public readonly record struct Lexem<TToken>
     {

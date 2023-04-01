@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     public record ParsingState<TSymbol>(
         ParsedSymbolsStack<TSymbol> ParsedSymbols,

@@ -1,7 +1,7 @@
 ﻿using System.Collections;
-using LRBee.Utilities;
+using LRToolkit.Utilities;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     public readonly struct SymbolCollection<TSymbol> : IEquatable<SymbolCollection<TSymbol>>, IReadOnlyList<Symbol<TSymbol>>
         where TSymbol : notnull

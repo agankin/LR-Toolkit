@@ -1,6 +1,6 @@
 ﻿using DFAutomaton;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     public class State<TSymbol> where TSymbol : notnull
     {

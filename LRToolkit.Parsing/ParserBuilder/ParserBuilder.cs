@@ -1,9 +1,9 @@
-﻿using LRBee.GrammarDefinition;
+﻿using LRToolkit.GrammarDefinition;
 using DFAutomaton;
 using Optional;
 using Optional.Unsafe;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     public class ParserBuilder<TSymbol> where TSymbol : notnull
     {

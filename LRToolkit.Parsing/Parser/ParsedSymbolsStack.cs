@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
-using LRBee.Utilities;
+using LRToolkit.Utilities;
 
-namespace LRBee.Parsing
+namespace LRToolkit.Parsing
 {
     public readonly record struct ParsedSymbolsStack<TSymbol> : IEnumerable<ParsedSymbol<TSymbol>>
         where TSymbol : notnull

@@ -1,4 +1,4 @@
-﻿namespace LRBee.Lexing
+﻿namespace LRToolkit.Lexing
 {
     public readonly record struct TextInput(string Text, int Position = 0)
     {

@@ -1,4 +1,4 @@
-﻿namespace LRBee.Utilities
+﻿namespace LRToolkit.Utilities
 {
     public readonly struct VoidValue { }
 }

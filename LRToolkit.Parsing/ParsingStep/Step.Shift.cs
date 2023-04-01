@@ -1,4 +1,4 @@
-﻿namespace LRBee.Parsing
+﻿namespace LRToolkit.Parsing
 {
     internal abstract partial class Step<TSymbol> where TSymbol : notnull
     {

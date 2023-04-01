@@ -1,4 +1,4 @@
-﻿namespace LRBee.GrammarDefinition
+﻿namespace LRToolkit.GrammarDefinition
 {
     public static class GrammarUtils
     {

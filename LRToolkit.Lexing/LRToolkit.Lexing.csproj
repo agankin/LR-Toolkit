@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LRBee.Utilities\LRBee.Utilities.csproj" />
+    <ProjectReference Include="..\LRToolkit.Utilities\LRToolkit.Utilities.csproj" />
   </ItemGroup>
 
 </Project>

@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LRBee.GrammarDefinition\LRBee.GrammarDefinition.csproj" />
+    <ProjectReference Include="..\LRToolkit.GrammarDefinition\LRToolkit.GrammarDefinition.csproj" />
   </ItemGroup>
 
   <ItemGroup>

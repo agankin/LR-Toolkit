@@ -8,10 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LRBee.GrammarDefinition\LRBee.GrammarDefinition.csproj" />
-    <ProjectReference Include="..\LRBee.Lexing\LRBee.Lexing.csproj" />
-    <ProjectReference Include="..\LRBee.Parsing\LRBee.Parsing.csproj" />
-    <ProjectReference Include="..\LRBee.Utilities\LRBee.Utilities.csproj" />
+    <ProjectReference Include="..\LRToolkit.GrammarDefinition\LRToolkit.GrammarDefinition.csproj" />
+    <ProjectReference Include="..\LRToolkit.Lexing\LRToolkit.Lexing.csproj" />
+    <ProjectReference Include="..\LRToolkit.Parsing\LRToolkit.Parsing.csproj" />
+    <ProjectReference Include="..\LRToolkit.Utilities\LRToolkit.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

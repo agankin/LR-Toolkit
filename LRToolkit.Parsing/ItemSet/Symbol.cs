@@ -44,23 +44,14 @@ namespace LRToolkit.Parsing
         private TResult MapType<TResult>(
             Func<TSymbol, TResult> mapSymbol,
             Func<TSymbol, ItemSet<TSymbol>, TResult> mapSymbolReduced,
-            Func<TResult> mapEnd)
-        {
-            switch (_type)
+            Func<TResult> mapEnd) =>
+            _type switch
             {
-                case Symbol<TSymbol>.SymbolType.Symbol:
-                    return mapSymbol(_symbol.ValueOrFailure());
-
-                case Symbol<TSymbol>.SymbolType.SymbolReduced:
-                    return mapSymbolReduced(_symbol.ValueOrFailure(), _goToAfterReduce.ValueOrFailure());
-
-                case Symbol<TSymbol>.SymbolType.End:
-                    return mapEnd();
-
-                default:
-                    throw new UnsupportedEnumValueException<SymbolType>(_type);
-            }
-        }
+                SymbolType.Symbol => mapSymbol(_symbol.ValueOrFailure()),
+                SymbolType.SymbolReduced => mapSymbolReduced(_symbol.ValueOrFailure(), _goToAfterReduce.ValueOrFailure()),
+                SymbolType.End => mapEnd(),
+                _ => throw new UnsupportedEnumValueException<SymbolType>(_type)
+            };
 
         private enum SymbolType
         {

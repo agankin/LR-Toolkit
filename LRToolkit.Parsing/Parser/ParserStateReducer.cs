@@ -3,7 +3,7 @@
 namespace LRToolkit.Parsing
 {
     internal delegate ParsingState<TSymbol> ParserStateReducer<TSymbol>(
-        AutomataRunState<Symbol<TSymbol>, ParsingState<TSymbol>> automataRunState,
+        AutomatonRunState<Symbol<TSymbol>, ParsingState<TSymbol>> automatonRunState,
         ParsingState<TSymbol> parsingState)
         where TSymbol : notnull;
 }

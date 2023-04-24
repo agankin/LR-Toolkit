@@ -25,7 +25,7 @@ namespace LRToolkit.Parsing
 
             var shiftReduceItems = afterSymbolItemSets.Kernel.Aggregate(
                 ShiftReduceItems.Empty,
-                (shiftReduce, item) => item.HasSymbolsAhead() 
+                (shiftReduce, item) => item.HasSymbolAhead() 
                     ? shiftReduce with { ShiftItems = shiftReduce.ShiftItems.Add(item) }
                     : shiftReduce with { ReduceItems = shiftReduce.ReduceItems.Add(item) });
 

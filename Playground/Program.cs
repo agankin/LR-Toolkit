@@ -14,7 +14,8 @@ var grammar = new GrammarBuilder<Symbol>(S)
     [A] = Prod(b)
 }.Build();
 
-var parserOrError = ParserBuilder<Symbol>.Build(grammar, ParserObserver.Configure);
+var lookaheadFactory = new OneLookaheadFactory<Symbol>();
+var parserOrError = ParserBuilder<Symbol>.Build(grammar, lookaheadFactory, ParserObserver.Configure);
 
 parserOrError.Map(parser =>
 {

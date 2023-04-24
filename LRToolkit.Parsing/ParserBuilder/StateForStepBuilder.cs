@@ -124,7 +124,7 @@ namespace LRToolkit.Parsing
                 var reducedToSymbol = reducedItem.ForSymbol;
                 var emitedNext = Symbol<TSymbol>.Create(reducedToSymbol, afterReduceState.FullItemSet);
                 var goToAfterReduce = StateReducerFactory.GoToAfterReduce(
-                    reducedToSymbol,
+                    reducedItem,
                     _observer.GoToAfterReduceListener);
                 
                 reduceStepState.LinkState(
@@ -140,8 +140,8 @@ namespace LRToolkit.Parsing
             Item<TSymbol> reducedItem,
             StatesLog<TSymbol> statesLog)
         {
-            var production = reducedItem.Production;
-            return statesLog[production.Count];
+            var goToBackStates = reducedItem.Count;
+            return statesLog[goToBackStates];
         }
     }
 }

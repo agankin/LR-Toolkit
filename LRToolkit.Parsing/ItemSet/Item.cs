@@ -1,14 +1,16 @@
 ﻿using LRToolkit.GrammarDefinition;
 using Optional;
+using Optional.Collections;
 
 namespace LRToolkit.Parsing
 {
     public record Item<TSymbol> where TSymbol : notnull
     {
-        private Item(TSymbol forSymbol, SymbolCollection<TSymbol> production, int position = 0)
+        private Item(TSymbol forSymbol, SymbolCollection<TSymbol> production, ILookahead<TSymbol> lookahead, int position = 0)
         {
             ForSymbol = forSymbol;
             Production = production;
+            Lookahead = lookahead;
             Position = position;
         }
 
@@ -16,11 +18,15 @@ namespace LRToolkit.Parsing
 
         public SymbolCollection<TSymbol> Production { get; init; }
 
+        public ILookahead<TSymbol> Lookahead { get; init; }
+
+        public int Count => Production.Count + Lookahead.Count;
+
         public int Position { get; init; }
 
         public bool IsRoot { get; init; }
 
-        public static Item<TSymbol> ForRoot(TSymbol root)
+        public static Item<TSymbol> ForRoot(TSymbol root, ILookahead<TSymbol> lookahead)
         {
             var production = new SymbolCollection<TSymbol>(new[]
             {
@@ -28,13 +34,13 @@ namespace LRToolkit.Parsing
                 Symbol<TSymbol>.End()
             });
 
-            return new Item<TSymbol>(root, production, position: 0)
+            return new Item<TSymbol>(root, production, lookahead, position: 0)
             {
                 IsRoot = true
             };
         }
 
-        public static Item<TSymbol> FromRule(ProductionRule<TSymbol> productionRule)
+        public static Item<TSymbol> FromRule(ProductionRule<TSymbol> productionRule, ILookahead<TSymbol> lookahead)
         {
             if (productionRule == null)
                 throw new ArgumentNullException(nameof(productionRule));
@@ -43,32 +49,53 @@ namespace LRToolkit.Parsing
             var production = new SymbolCollection<TSymbol>(
                 productionRule.Production.Select(Symbol<TSymbol>.Create).ToArray());
 
-            return new Item<TSymbol>(forSymbol, production, position: 0);
+            return new Item<TSymbol>(forSymbol, production, lookahead, position: 0);
         }
 
-        public Option<Symbol<TSymbol>> GetSymbolAhead() =>
-            ForHasSymbolsAhead(() => Production[Position]);
+        public Option<Symbol<TSymbol>> GetSymbolAhead(int idxFromPosition = 0)
+        {
+            var symbolAheadPosition = Position + idxFromPosition;
+
+            return Production.ElementAtOrNone(symbolAheadPosition)
+                .Else(Lookahead[symbolAheadPosition - Production.Count]);
+        }
 
         public Option<Item<TSymbol>> StepForward() =>
-            ForHasSymbolsAhead(() => this with { Position = Position + 1 });
+            HasSymbolAhead()
+                ? (this with { Position = Position + 1 }).Some()
+                : Option.None<Item<TSymbol>>();
 
-        public bool HasSymbolsAhead() => Position < Production.Count;
+        public bool HasSymbolAhead() => Position < Count;
+
+        public bool HasProductionSymbolAhead() => Position < Production.Count;
 
         public override string ToString()
         {
             var forSymbol = ForSymbol;
-            var productionSymbols = string.Join(
+            var formattedProductionsAndLookaheads = GetFormattedProductionsAndLookaheads();
+
+            return $"{forSymbol} -> {formattedProductionsAndLookaheads}";
+        }
+
+        private string GetFormattedProductionsAndLookaheads()
+        {
+            var formattedProductions = string.Join(
                 ", ",
                 Production.Select((symbol, idx) => idx == Position
                     ? $"*{symbol}"
-                    : symbol.ToString() ?? string.Empty));
-            var lastPos = Position == Production.Count ? "*" : string.Empty;
+                    : symbol.ToString()));
 
-            return $"{forSymbol} -> {productionSymbols}{lastPos}";
+            var lookaheadPosition = Position - Production.Count;
+            var formattedLookaheads = string.Join(
+                ", ",
+                Lookahead.Select((symbol, idx) => idx == lookaheadPosition
+                    ? $"*{symbol}"
+                    : symbol.ToString()));
+            var lastPos = Position == Count ? "*" : string.Empty;
+
+            return Lookahead.Count > 0
+                ? $"{formattedProductions}; {formattedLookaheads}{lastPos}"
+                : $"{formattedProductions}{lastPos}";
         }
-
-        private Option<TResult> ForHasSymbolsAhead<TResult>(Func<TResult> getValue) => HasSymbolsAhead()
-            ? getValue().Some()
-            : Option.None<TResult>();
     }
 }

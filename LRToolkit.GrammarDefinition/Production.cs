@@ -1,8 +1,10 @@
 ﻿using System.Collections;
+using Optional;
+using Optional.Collections;
 
 namespace LRToolkit.GrammarDefinition
 {
-    public class Production<TSymbol> : IReadOnlyList<TSymbol>
+    public class Production<TSymbol> : IReadOnlyCollection<TSymbol>
     {
         private readonly IReadOnlyList<TSymbol> _productionSymbols;
 
@@ -11,7 +13,7 @@ namespace LRToolkit.GrammarDefinition
 
         public Production(params TSymbol[] productionSymbols) : this(productionSymbols.AsReadOnly()) { }
 
-        public TSymbol this[int index] => _productionSymbols[index];
+        public Option<TSymbol> this[int index] => _productionSymbols.ElementAtOrNone(index);
 
         public TSymbol First => _productionSymbols[0];
 

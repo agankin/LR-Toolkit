@@ -10,9 +10,9 @@ namespace LRToolkit.Parsing
             ShiftListener<TSymbol> listener)
             where TSymbol : notnull
         {
-            return (automataRunState, parsingState) =>
+            return (automatonRunState, parsingState) =>
             {
-                listener(parsingState, symbolAhead, automataRunState.TransitingTo);
+                listener(parsingState, symbolAhead, automatonRunState.TransitingTo);
                 var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
 
                 return parsingState with
@@ -32,12 +32,11 @@ namespace LRToolkit.Parsing
             ReduceListener<TSymbol> listener)
             where TSymbol : notnull
         {
-            return (automataRunState, parsingState) =>
+            return (automatonRunState, parsingState) =>
             {
-                listener(parsingState, symbolAhead, reducedItem, automataRunState.TransitingTo);
+                listener(parsingState, symbolAhead, reducedItem, automatonRunState.TransitingTo);
 
                 var reducedToSymbol = reducedItem.ForSymbol;
-                var reducedSymbolsCount = reducedItem.Production.Count;
                 var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
 
                 var (newParsedSymbols, reducedParsedSymbol) = symbolAhead.MapSymbol(
@@ -45,12 +44,12 @@ namespace LRToolkit.Parsing
                     () => throw new InvalidOperationException("Reduce called for END symbol."));
                 var newParsedSymbolsItemSets = parsedSymbolsItemSets
                     .Push(afterSymbolFullItemSet)
-                    .PopSkip(reducedSymbolsCount);
+                    .PopSkip(reducedItem.Count);
 
                 var goToAfterReduce = newParsedSymbolsItemSets.Peek();
                 var nextEmitForGoToAfterReduce = Symbol<TSymbol>.Create(reducedToSymbol, goToAfterReduce);
-                automataRunState.EmitNext(nextEmitForGoToAfterReduce);
-
+                automatonRunState.EmitNext(nextEmitForGoToAfterReduce);
+                
                 return parsingState with
                 {
                     ParsedSymbols = newParsedSymbols,
@@ -65,9 +64,9 @@ namespace LRToolkit.Parsing
             AcceptListener<TSymbol> listener)
             where TSymbol : notnull
         {
-            return (automataRunState, parsingState) =>
+            return (automatonRunState, parsingState) =>
             {
-                listener(parsingState, automataRunState.TransitingTo);
+                listener(parsingState, automatonRunState.TransitingTo);
                 var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
 
                 return parsingState with
@@ -79,16 +78,19 @@ namespace LRToolkit.Parsing
         }
 
         public static ParserStateReducer<TSymbol> GoToAfterReduce<TSymbol>(
-            TSymbol reducedToSymbol,
+            Item<TSymbol> reducedItem,
             GoToAfterReduceListener<TSymbol> listener)
             where TSymbol : notnull
         {
+            var reducedToSymbol = reducedItem.ForSymbol;
             var symbol = Symbol<TSymbol>.Create(reducedToSymbol);
 
-            return (automataRunState, parsingState) =>
+            return (automatonRunState, parsingState) =>
             {
-                listener(parsingState, symbol, automataRunState.TransitingTo);
-                automataRunState.EmitNext(symbol);
+                listener(parsingState, symbol, automatonRunState.TransitingTo);
+                
+                automatonRunState.EmitNext(symbol);
+                reducedItem.Lookahead.ForEach(automatonRunState.EmitNext);
 
                 return parsingState;
             };

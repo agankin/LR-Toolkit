@@ -7,8 +7,7 @@ namespace LRToolkit.Parsing
     {
         private readonly IReadOnlySet<Item<TSymbol>> _items;
 
-        public ItemSet(IEnumerable<Item<TSymbol>> items) =>
-            _items = new HashSet<Item<TSymbol>>(items);
+        public ItemSet(IReadOnlySet<Item<TSymbol>> items) => _items = items;
 
         public IReadOnlySet<Symbol<TSymbol>> GetSymbolsAhead()
         {
@@ -19,7 +18,7 @@ namespace LRToolkit.Parsing
         public ItemSet<TSymbol> StepForward(Symbol<TSymbol> symbol)
         {
             var symbolAheadItems = _items.Where(item => item.GetSymbolAhead().SomeEquals(symbol));
-            var items = symbolAheadItems.OnlySome(item => item.StepForward());
+            var items = symbolAheadItems.OnlySome(item => item.StepForward()).ToHashSet();
 
             return new ItemSet<TSymbol>(items);
         }

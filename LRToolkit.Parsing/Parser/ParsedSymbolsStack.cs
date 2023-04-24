@@ -24,7 +24,7 @@ namespace LRToolkit.Parsing
         public (ParsedSymbolsStack<TSymbol>, ParsedSymbol<TSymbol>) Reduce(TSymbol symbolAhead, Item<TSymbol> reducedItem)
         {
             var reducedToSymbol = reducedItem.ForSymbol;
-            var reducedSymbolsCount = reducedItem.Production.Count();
+            var reducedSymbolsCount = reducedItem.Count;
 
             var parsedSymbolAhead = ParsedSymbol<TSymbol>.ForShift(symbolAhead);
 

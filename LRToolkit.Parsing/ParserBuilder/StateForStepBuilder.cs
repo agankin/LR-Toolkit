@@ -122,7 +122,7 @@ namespace LRToolkit.Parsing
                 var afterReduceState = GetAfterReduceState(reducedItem, statesLog);
 
                 var reducedToSymbol = reducedItem.ForSymbol;
-                var emitedNext = Symbol<TSymbol>.Create(reducedToSymbol, afterReduceState.FullItemSet);
+                var emitedNext = Symbol<TSymbol>.CreateReduced(reducedToSymbol, afterReduceState.FullItemSet);
                 var goToAfterReduce = StateReducerFactory.GoToAfterReduce(
                     reducedItem,
                     _observer.GoToAfterReduceListener);

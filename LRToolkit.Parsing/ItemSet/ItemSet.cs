@@ -33,7 +33,7 @@ namespace LRToolkit.Parsing
         public override bool Equals(object? obj) =>
             obj is ItemSet<TSymbol> other && Equals(other);
 
-        public override int GetHashCode() => FNVHash.Get(_items);
+        public override int GetHashCode() => Hash.CalculateFNV(_items);
 
         public override string ToString() => string.Join(", ", _items.Select(item => $"[{item}]"));
     }

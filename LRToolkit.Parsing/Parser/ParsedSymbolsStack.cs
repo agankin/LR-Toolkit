@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Immutable;
 using LRToolkit.Utilities;
+using Optional;
 
 namespace LRToolkit.Parsing
 {
@@ -21,16 +22,19 @@ namespace LRToolkit.Parsing
             return this with { ParsedSymbols = ParsedSymbols.Push(parsedSymbol) };
         }
 
-        public (ParsedSymbolsStack<TSymbol>, ParsedSymbol<TSymbol>) Reduce(TSymbol symbolAhead, Item<TSymbol> reducedItem)
+        public (ParsedSymbolsStack<TSymbol>, ParsedSymbol<TSymbol>) Reduce(Item<TSymbol> reducedItem) =>
+            Reduce(reducedItem, Option.None<TSymbol>());
+
+        public (ParsedSymbolsStack<TSymbol>, ParsedSymbol<TSymbol>) Reduce(Item<TSymbol> reducedItem, Option<TSymbol> symbolAheadOption)
         {
             var reducedToSymbol = reducedItem.ForSymbol;
-            var reducedSymbolsCount = reducedItem.Count;
+            var reducedSymbolsCount = reducedItem.ProductionCount;
 
-            var parsedSymbolAhead = ParsedSymbol<TSymbol>.ForShift(symbolAhead);
+            var @this = this;
+            var parsedSymbols = symbolAheadOption.Map(ParsedSymbol<TSymbol>.ForShift)
+                .Match(@this.ParsedSymbols.Push, () => @this.ParsedSymbols);
 
-            var (newParsedSymbols, reducedSymbols) = ParsedSymbols
-                .Push(parsedSymbolAhead)
-                .Pop(reducedSymbolsCount);
+            var (newParsedSymbols, reducedSymbols) = parsedSymbols.Pop(reducedSymbolsCount);
             var reducedParsedSymbol = ParsedSymbol<TSymbol>.ForReduce(reducedToSymbol, reducedSymbols);
 
             return (this with { ParsedSymbols = newParsedSymbols }, reducedParsedSymbol);

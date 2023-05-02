@@ -1,4 +1,5 @@
 ﻿using LRToolkit.Utilities;
+using Optional;
 
 namespace LRToolkit.Parsing
 {
@@ -17,9 +18,10 @@ namespace LRToolkit.Parsing
 
                 return parsingState with
                 {
-                    ParsedSymbols = symbolAhead.MapSymbol(
-                        parsedSymbols.Shift,
-                        () => throw new InvalidOperationException("Shift called for END symbol.")),
+                    ParsedSymbols = symbolAhead.MapByType(
+                        mapSymbol: parsedSymbols.Shift,
+                        mapLookaheadSymbol: _ => parsedSymbols,
+                        mapEnd: () => parsedSymbols),
                     ParsedSymbolsItemSets = parsedSymbolsItemSets.Push(afterSymbolFullItemSet),
                 };
             };
@@ -39,15 +41,17 @@ namespace LRToolkit.Parsing
                 var reducedToSymbol = reducedItem.ForSymbol;
                 var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
 
-                var (newParsedSymbols, reducedParsedSymbol) = symbolAhead.MapSymbol(
-                    symbol => parsedSymbols.Reduce(symbol, reducedItem), 
-                    () => throw new InvalidOperationException("Reduce called for END symbol."));
+                var (newParsedSymbols, reducedParsedSymbol) = symbolAhead.MapByType(
+                    mapSymbol: symbol => parsedSymbols.Reduce(reducedItem, symbol.Some()), 
+                    mapLookaheadSymbol: _ => parsedSymbols.Reduce(reducedItem),
+                    mapEnd: () => parsedSymbols.Reduce(reducedItem));
+                
                 var newParsedSymbolsItemSets = parsedSymbolsItemSets
                     .Push(afterSymbolFullItemSet)
                     .PopSkip(reducedItem.Count);
 
                 var goToAfterReduce = newParsedSymbolsItemSets.Peek();
-                var nextEmitForGoToAfterReduce = Symbol<TSymbol>.Create(reducedToSymbol, goToAfterReduce);
+                var nextEmitForGoToAfterReduce = Symbol<TSymbol>.CreateReduced(reducedToSymbol, goToAfterReduce);
                 automatonRunState.EmitNext(nextEmitForGoToAfterReduce);
                 
                 return parsingState with
@@ -71,7 +75,10 @@ namespace LRToolkit.Parsing
 
                 return parsingState with
                 {
-                    ParsedSymbols = symbolAhead.MapSymbol(parsedSymbols.Shift, () => parsedSymbols),
+                    ParsedSymbols = symbolAhead.MapByType(
+                        mapSymbol: parsedSymbols.Shift,
+                        mapLookaheadSymbol: _ => parsedSymbols,
+                        mapEnd: () => parsedSymbols),
                     ParsedSymbolsItemSets = parsedSymbolsItemSets.Push(afterSymbolFullItemSet)
                 };
             };

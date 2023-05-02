@@ -4,8 +4,6 @@ namespace LRToolkit.Parsing
 {
     public class NoLookaheadFactory<TSymbol> : ILookaheadFactory<TSymbol> where TSymbol : notnull
     {
-        public ILookahead<TSymbol> CreateForStart() => NoLookahead<TSymbol>.Instance;
-
         public ILookahead<TSymbol> CreateForSymbolAhead(Item<TSymbol> item) => NoLookahead<TSymbol>.Instance;
 
         public ILookahead<TSymbol> CreateForSymbolProduction(Production<TSymbol> symbolProduction, ILookahead<TSymbol> symbolLookahead) =>

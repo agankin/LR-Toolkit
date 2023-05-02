@@ -57,7 +57,8 @@ namespace LRToolkit.Parsing
                 return Enumerable.Empty<SymbolWithLookahead>();
 
             return item.GetSymbolAhead()
-                .Map(symbol => symbol.MapSymbol(
+                .Map(symbol => symbol.MapByType(
+                    symbolValue => GetWithFullLookaheadSet(symbolValue, GetLookahead(item)),
                     symbolValue => GetWithFullLookaheadSet(symbolValue, GetLookahead(item)),
                     () => Enumerable.Empty<SymbolWithLookahead>()))
                 .ValueOr(Enumerable.Empty<SymbolWithLookahead>());

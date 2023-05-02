@@ -91,7 +91,7 @@ namespace LRToolkit.Parsing
         private ItemSet<TSymbol> CreateStartItemSet()
         {
             var start = _grammar.Start;
-            var startLookahead = _lookaheadFactory.CreateForStart();
+            var startLookahead = NoLookahead<TSymbol>.Instance;
 
             var kernelItem = Item<TSymbol>.ForRoot(start, startLookahead);
             var closureItems = _closureGenerator.GetClosureItems(kernelItem);

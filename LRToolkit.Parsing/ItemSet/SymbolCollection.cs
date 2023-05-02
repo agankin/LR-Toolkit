@@ -23,6 +23,6 @@ namespace LRToolkit.Parsing
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public override int GetHashCode() => FNVHash.Get(_symbols);
+        public override int GetHashCode() => Hash.CalculateFNV(_symbols);
     }
 }

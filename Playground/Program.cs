@@ -23,7 +23,8 @@ parserOrError.Map(parser =>
     Console.WriteLine(formattedGraph);
 
     Console.WriteLine("Run Parser:");
-    parser.Run(new[] { a, b, a, b }).MatchNone(error => Console.WriteLine($"Error: {error.Type}"));
+    parser.Run(new[] { a, b, a, b })
+       .MatchNone(error => Console.WriteLine($"{error.State} {error.Transition} -> Error: {error.Type}"));
 
     return new VoidValue();
 });

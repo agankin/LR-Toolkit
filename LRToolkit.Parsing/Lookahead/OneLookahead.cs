@@ -8,7 +8,7 @@ namespace LRToolkit.Parsing
     {
         private readonly Symbol<TSymbol> _symbol;
 
-        public OneLookahead(TSymbol symbol) => _symbol = Symbol<TSymbol>.Create(symbol);
+        public OneLookahead(TSymbol symbol) => _symbol = Symbol<TSymbol>.CreateLookahead(symbol);
 
         public OneLookahead(Symbol<TSymbol> symbol) => _symbol = symbol;
 

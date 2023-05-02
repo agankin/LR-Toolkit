@@ -20,6 +20,8 @@ namespace LRToolkit.Parsing
 
         public ILookahead<TSymbol> Lookahead { get; init; }
 
+        public int ProductionCount => Production.Count;
+
         public int Count => Production.Count + Lookahead.Count;
 
         public int Position { get; init; }

@@ -29,6 +29,9 @@ parserOrError.Map(parser =>
     return new VoidValue();
 });
 
+Console.Write("To exit press any key...");
+Console.ReadKey(true);
+
 public enum Symbol
 {
     S,

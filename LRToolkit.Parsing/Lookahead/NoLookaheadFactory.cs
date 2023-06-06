@@ -1,15 +1,19 @@
 ﻿using LRToolkit.GrammarDefinition;
+using Optional;
 
 namespace LRToolkit.Parsing
 {
     public class NoLookaheadFactory<TSymbol> : ILookaheadFactory<TSymbol> where TSymbol : notnull
     {
-        public ILookahead<TSymbol> CreateForSymbolAhead(Item<TSymbol> item) => NoLookahead<TSymbol>.Instance;
+        public Option<SymbolLookahead<TSymbol>> GetAhead(Item<TSymbol> item) =>
+            item.GetSymbolAhead()
+                .Map(symbolAhead => new SymbolLookahead<TSymbol>(symbolAhead, NoLookahead<TSymbol>.Instance));
 
-        public ILookahead<TSymbol> CreateForSymbolProduction(Production<TSymbol> symbolProduction, ILookahead<TSymbol> symbolLookahead) =>
-            NoLookahead<TSymbol>.Instance;
+        public IReadOnlySet<ILookahead<TSymbol>> GetFullSet(ILookahead<TSymbol> symbolLookahead)
+        {
+            var lookahead = NoLookahead<TSymbol>.Instance;
 
-        public IReadOnlySet<ILookahead<TSymbol>> CreateFullSet(ILookahead<TSymbol> lookahead, Grammar<TSymbol> grammar) =>
-            new HashSet<ILookahead<TSymbol>> { lookahead };
+            return new HashSet<ILookahead<TSymbol>> { lookahead };
+        }
     }
 }

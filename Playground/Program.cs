@@ -14,7 +14,7 @@ var grammar = new GrammarBuilder<Symbol>(S)
     [A] = Prod(b)
 }.Build();
 
-var lookaheadFactory = new OneLookaheadFactory<Symbol>();
+var lookaheadFactory = new OneLookaheadFactory<Symbol>(grammar);
 var parserOrError = ParserBuilder<Symbol>.Build(grammar, lookaheadFactory, ParserObserver.Configure);
 
 parserOrError.Map(parser =>
@@ -26,6 +26,11 @@ parserOrError.Map(parser =>
     parser.Run(new[] { a, b, a, b })
        .MatchNone(error => Console.WriteLine($"{error.State} {error.Transition} -> Error: {error.Type}"));
 
+    return new VoidValue();
+})
+.Or(error =>
+{
+    Console.WriteLine($"Error: {error}");
     return new VoidValue();
 });
 

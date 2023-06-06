@@ -15,7 +15,7 @@ namespace LRToolkit.Parsing
 
         public ItemSet<TSymbol> GetClosureItems(Item<TSymbol> kernelItem)
         {
-            var symbolAheads = GetSymbolAheadWithLookaheads(kernelItem);
+            var symbolAheads = GetSymbolAhead(kernelItem);
             var closureItems = symbolAheads.SelectMany(GetSymbolProductions).ToHashSet();
 
             return new ItemSet<TSymbol>(closureItems);
@@ -23,61 +23,65 @@ namespace LRToolkit.Parsing
 
         public ItemSet<TSymbol> GetClosureItems(ItemSet<TSymbol> kernelItemSet)
         {
-            var symbolsAhead = kernelItemSet.SelectMany(GetSymbolAheadWithLookaheads).ToHashSet();
+            var symbolsAhead = kernelItemSet.SelectMany(GetSymbolAhead).ToHashSet();
             var nextSymbolsItems = symbolsAhead.SelectMany(GetSymbolProductions).ToHashSet();
 
             return new ItemSet<TSymbol>(nextSymbolsItems);
         }
 
-        private IEnumerable<Item<TSymbol>> GetSymbolProductions(SymbolWithLookahead symbolWithLookahead) =>
-            GetSymbolProductions(symbolWithLookahead, new HashSet<TSymbol>());
+        private IEnumerable<Item<TSymbol>> GetSymbolProductions(SymbolLookahead symbolLookahead) =>
+            GetSymbolProductions(symbolLookahead, new HashSet<SymbolLookahead>());
 
-        private IEnumerable<Item<TSymbol>> GetSymbolProductions(SymbolWithLookahead symbolWithLookahead, ISet<TSymbol> processedSymbols)
+        private IEnumerable<Item<TSymbol>> GetSymbolProductions(SymbolLookahead symbolLookahead, ISet<SymbolLookahead> processedSymbols)
         {
-            var (symbol, symbolLookahead) = symbolWithLookahead;
+            processedSymbols.Add(symbolLookahead);
 
-            processedSymbols.Add(symbol);
-
+            var (symbol, lookahead) = symbolLookahead;
+            
             var symbolProductionRules = _grammar[symbol];
             var firstSymbols = symbolProductionRules
                 .Select(productionRule => productionRule.Production)
-                .Where(production => !processedSymbols.Contains(production.First))
-                .SelectMany(production => GetFirstWithLookaheads(production, symbolLookahead))
+                .SelectMany(production => GetFirstInProduction(production, lookahead))
+                .Where(symbolLookahead => !processedSymbols.Contains(symbolLookahead))
                 .ToHashSet();
 
-            var items = symbolProductionRules.Select(rule => Item<TSymbol>.FromRule(rule, symbolLookahead));
+            var items = symbolProductionRules.Select(rule => Item<TSymbol>.FromRule(rule, lookahead));
             var firstSymbolsItems = firstSymbols.SelectMany(next => GetSymbolProductions(next, processedSymbols));
 
             return items.Concat(firstSymbolsItems);
         }
 
-        private IEnumerable<SymbolWithLookahead> GetSymbolAheadWithLookaheads(Item<TSymbol> item)
+        private IEnumerable<SymbolLookahead> GetSymbolAhead(Item<TSymbol> item)
         {
             if (!item.HasProductionSymbolAhead())
-                return Enumerable.Empty<SymbolWithLookahead>();
+                return Enumerable.Empty<SymbolLookahead>();
 
-            return item.GetSymbolAhead()
-                .Map(symbol => symbol.MapByType(
-                    symbolValue => GetWithFullLookaheadSet(symbolValue, GetLookahead(item)),
-                    symbolValue => GetWithFullLookaheadSet(symbolValue, GetLookahead(item)),
-                    () => Enumerable.Empty<SymbolWithLookahead>()))
-                .ValueOr(Enumerable.Empty<SymbolWithLookahead>());
+            return _lookaheadFactory.GetAhead(item)
+                .Map(symbolLookahead => 
+                {
+                    var (symbol, lookahead) = symbolLookahead;
+
+                    return symbol.MapByType(
+                        plainSymbol => GetAllLookaheads(plainSymbol, lookahead),
+                        _ => throw new Exception("Unexpected invocation for lookahead symbol."),
+                        () => Enumerable.Empty<SymbolLookahead>());
+                })
+                .ValueOr(Enumerable.Empty<SymbolLookahead>());
         }
 
-        private IEnumerable<SymbolWithLookahead> GetFirstWithLookaheads(Production<TSymbol> symbolProduction, ILookahead<TSymbol> symbolLookahead)
+        private IEnumerable<SymbolLookahead> GetFirstInProduction(Production<TSymbol> symbolProduction, ILookahead<TSymbol> symbolLookahead)
         {
             var first = symbolProduction.First;
-            var lookahead = _lookaheadFactory.CreateForSymbolProduction(symbolProduction, symbolLookahead);
 
-            return GetWithFullLookaheadSet(first, lookahead);
+            return _lookaheadFactory.GetFullSet(symbolLookahead).Select(CreateSymbolLookahead(first));
         }
 
-        private ILookahead<TSymbol> GetLookahead(Item<TSymbol> item) => _lookaheadFactory.CreateForSymbolAhead(item);
+        private IEnumerable<SymbolLookahead> GetAllLookaheads(TSymbol symbol, ILookahead<TSymbol> lookahead) =>
+            _lookaheadFactory.GetFullSet(lookahead).Select(CreateSymbolLookahead(symbol));
 
-        private IEnumerable<SymbolWithLookahead> GetWithFullLookaheadSet(TSymbol symbol, ILookahead<TSymbol> lookahead) =>
-            _lookaheadFactory.CreateFullSet(lookahead, _grammar)
-                .Select(lookaheadFromFullSet => new SymbolWithLookahead(symbol, lookaheadFromFullSet));
+        private Func<ILookahead<TSymbol>, SymbolLookahead> CreateSymbolLookahead(TSymbol symbol) =>
+            lookahead => new SymbolLookahead(symbol, lookahead);
 
-        private record SymbolWithLookahead(TSymbol Symbol, ILookahead<TSymbol> Lookahead);
+        private readonly record struct SymbolLookahead(TSymbol Symbol, ILookahead<TSymbol> Lookahead);
     }
 }

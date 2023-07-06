@@ -1,53 +1,58 @@
-﻿using LRToolkit.Utilities;
-using Optional;
+﻿using DFAutomaton;
+using LRToolkit.Utilities;
+using Optional.Unsafe;
 
 namespace LRToolkit.Parsing
 {
     internal static class StateReducerFactory
     {
-        public static ParserStateReducer<TSymbol> Shift<TSymbol>(
-            Symbol<TSymbol> symbolAhead,
-            ItemSet<TSymbol> afterSymbolFullItemSet,
+        public static StateReducer<Symbol<TSymbol>, ParsingState<TSymbol>> Shift<TSymbol>(
+            Symbol<TSymbol> symbol,
+            ItemSet<TSymbol> nextItemSet,
             ShiftListener<TSymbol> listener)
             where TSymbol : notnull
         {
             return (automatonRunState, parsingState) =>
             {
-                listener(parsingState, symbolAhead, automatonRunState.TransitingTo);
+                listener(parsingState, symbol, automatonRunState.TransitingTo);
                 var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
 
                 return parsingState with
                 {
-                    ParsedSymbols = symbolAhead.MapByType(
-                        mapSymbol: parsedSymbols.Shift,
-                        mapLookaheadSymbol: _ => parsedSymbols,
-                        mapEnd: () => parsedSymbols),
-                    ParsedSymbolsItemSets = parsedSymbolsItemSets.Push(afterSymbolFullItemSet),
+                    ParsedSymbols = symbol.Type switch
+                    {
+                        SymbolType.Symbol => parsedSymbols.Shift(symbol.Value.ValueOrFailure()),
+                        _ => parsedSymbols
+                    },
+                    ParsedSymbolsItemSets = parsedSymbolsItemSets.Push(nextItemSet),
                 };
             };
         }
 
-        public static ParserStateReducer<TSymbol> Reduce<TSymbol>(
-            Symbol<TSymbol> symbolAhead,
-            ItemSet<TSymbol> afterSymbolFullItemSet,
+        public static StateReducer<Symbol<TSymbol>, ParsingState<TSymbol>> Reduce<TSymbol>(
+            Symbol<TSymbol> symbol,
+            ItemSet<TSymbol> nextItemSet,
             Item<TSymbol> reducedItem,
             ReduceListener<TSymbol> listener)
             where TSymbol : notnull
         {
             return (automatonRunState, parsingState) =>
             {
-                listener(parsingState, symbolAhead, reducedItem, automatonRunState.TransitingTo);
+                listener(parsingState, symbol, reducedItem, automatonRunState.TransitingTo);
 
                 var reducedToSymbol = reducedItem.ForSymbol;
                 var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
 
-                var (newParsedSymbols, reducedParsedSymbol) = symbolAhead.MapByType(
-                    mapSymbol: symbol => parsedSymbols.Reduce(reducedItem, symbol.Some()), 
-                    mapLookaheadSymbol: _ => parsedSymbols.Reduce(reducedItem),
-                    mapEnd: () => parsedSymbols.Reduce(reducedItem));
+                var (newParsedSymbols, reducedParsedSymbol) = symbol.Type switch
+                {
+                    SymbolType.Symbol => parsedSymbols
+                        .Shift(symbol.Value.ValueOrFailure())
+                        .Reduce(reducedItem), 
+                    _ => parsedSymbols.Reduce(reducedItem)
+                };
                 
                 var newParsedSymbolsItemSets = parsedSymbolsItemSets
-                    .Push(afterSymbolFullItemSet)
+                    .Push(nextItemSet)
                     .PopSkip(reducedItem.Count);
 
                 var goToAfterReduce = newParsedSymbolsItemSets.Peek();
@@ -62,9 +67,9 @@ namespace LRToolkit.Parsing
             };
         }
 
-        public static ParserStateReducer<TSymbol> Accept<TSymbol>(
-            Symbol<TSymbol> symbolAhead,
-            ItemSet<TSymbol> afterSymbolFullItemSet,
+        public static StateReducer<Symbol<TSymbol>, ParsingState<TSymbol>> Accept<TSymbol>(
+            Symbol<TSymbol> symbol,
+            ItemSet<TSymbol> nextItemSet,
             AcceptListener<TSymbol> listener)
             where TSymbol : notnull
         {
@@ -75,22 +80,22 @@ namespace LRToolkit.Parsing
 
                 return parsingState with
                 {
-                    ParsedSymbols = symbolAhead.MapByType(
-                        mapSymbol: parsedSymbols.Shift,
-                        mapLookaheadSymbol: _ => parsedSymbols,
-                        mapEnd: () => parsedSymbols),
-                    ParsedSymbolsItemSets = parsedSymbolsItemSets.Push(afterSymbolFullItemSet)
+                    ParsedSymbols = symbol.Type switch
+                    {
+                        SymbolType.Symbol => parsedSymbols.Shift(symbol.Value.ValueOrFailure()),
+                        _ => parsedSymbols
+                    },
+                    ParsedSymbolsItemSets = parsedSymbolsItemSets.Push(nextItemSet)
                 };
             };
         }
 
-        public static ParserStateReducer<TSymbol> GoToAfterReduce<TSymbol>(
+        public static StateReducer<Symbol<TSymbol>, ParsingState<TSymbol>> GoToAfterReduce<TSymbol>(
             Item<TSymbol> reducedItem,
             GoToAfterReduceListener<TSymbol> listener)
             where TSymbol : notnull
         {
-            var reducedToSymbol = reducedItem.ForSymbol;
-            var symbol = Symbol<TSymbol>.Create(reducedToSymbol);
+            var symbol = Symbol<TSymbol>.Create(reducedItem.ForSymbol);
 
             return (automatonRunState, parsingState) =>
             {

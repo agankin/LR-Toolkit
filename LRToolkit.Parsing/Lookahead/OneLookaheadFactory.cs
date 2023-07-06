@@ -12,28 +12,23 @@ namespace LRToolkit.Parsing
 
         public OneLookaheadFactory(Grammar<TSymbol> grammar) => _grammar = grammar;
 
-        public Option<SymbolLookahead<TSymbol>> GetAhead(Item<TSymbol> item) =>
-            item.GetSymbolAhead()
-                .FlatMap(symbol => item.GetSymbolAhead(LookaheadIdx).Map(lookahead => (symbol, lookahead)))
-                .Map(symbolLookahead =>
-                {
-                    var (symbol, lookahead) = symbolLookahead;
-                    return new SymbolLookahead<TSymbol>(symbol, new OneLookahead<TSymbol>(lookahead));
-                });
+        public ILookahead<TSymbol> GetStart() => new OneLookahead<TSymbol>(Symbol<TSymbol>.End());
 
-        public IReadOnlySet<ILookahead<TSymbol>> GetFullSet(ILookahead<TSymbol> lookahead)
+        public Option<ILookahead<TSymbol>> GetAhead(Item<TSymbol> item) =>
+            item.GetSymbolAhead(LookaheadIdx).Map<ILookahead<TSymbol>>(symbol => new OneLookahead<TSymbol>(symbol));
+
+        public IEnumerable<ILookahead<TSymbol>> Produce(ILookahead<TSymbol> lookahead)
         {
             var lookaheadSymbol = lookahead[0].ValueOrFailure();
 
             IEnumerable<ILookahead<TSymbol>> SelectFirstSymbolsInProductions(TSymbol symbol) =>
                 _grammar[symbol].Select(rule => new OneLookahead<TSymbol>(rule.Production.First));
 
-            var lookaheadProductions = lookaheadSymbol.MapByType(
-                mapSymbol: SelectFirstSymbolsInProductions,
-                mapLookaheadSymbol: SelectFirstSymbolsInProductions,
-                mapEnd: () => Enumerable.Empty<ILookahead<TSymbol>>());
+            var lookaheadProductions = lookaheadSymbol.Value
+                .Map(SelectFirstSymbolsInProductions)
+                .ValueOr(() => Enumerable.Empty<ILookahead<TSymbol>>());
                 
-            return lookaheadProductions.Prepend(lookahead).ToHashSet<ILookahead<TSymbol>>();
+            return lookaheadProductions.Prepend(lookahead).Distinct();
         }
     }
 }

@@ -1,12 +1,13 @@
-﻿using LRToolkit.GrammarDefinition;
-using Optional;
+﻿using Optional;
 
 namespace LRToolkit.Parsing
 {
     public interface ILookaheadFactory<TSymbol> where TSymbol : notnull
     {
-        Option<SymbolLookahead<TSymbol>> GetAhead(Item<TSymbol> item);
+        ILookahead<TSymbol> GetStart();
+        
+        Option<ILookahead<TSymbol>> GetAhead(Item<TSymbol> item);
 
-        IReadOnlySet<ILookahead<TSymbol>> GetFullSet(ILookahead<TSymbol> symbolLookahead);
+        IEnumerable<ILookahead<TSymbol>> Produce(ILookahead<TSymbol> symbolLookahead);
     }
 }

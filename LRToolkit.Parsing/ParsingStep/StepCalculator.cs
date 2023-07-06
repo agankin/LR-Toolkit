@@ -1,115 +1,82 @@
-﻿using System.Collections.Immutable;
+﻿using LRToolkit.Utilities;
 using Optional;
-using Optional.Unsafe;
 
 namespace LRToolkit.Parsing
 {
     internal class StepCalculator<TSymbol> where TSymbol : notnull
     {
-        private readonly ClosureItemSetGenerator<TSymbol> _closureGenerator;
+        private readonly ClosureProducer<TSymbol> _closureGenerator;
         private readonly ParserTransitionsObserver<TSymbol> _observer;
 
         public StepCalculator(
-            ClosureItemSetGenerator<TSymbol> closureGenerator,
+            ClosureProducer<TSymbol> closureGenerator,
             ParserTransitionsObserver<TSymbol> observer)
         {
             _closureGenerator = closureGenerator;
             _observer = observer;
         }
 
-        public Option<Step<TSymbol>, BuilderError> GetForSymbolAhead(
-            ItemSet<TSymbol> beforeSymbolItemSet,
-            Symbol<TSymbol> symbolAhead)
+        public Option<Step<TSymbol>, BuilderError> GetStep(ItemSet<TSymbol> itemSet, Symbol<TSymbol> symbol)
         {
-            var afterSymbolItemSets = GetItemSetsAfterSymbol(beforeSymbolItemSet, symbolAhead);
+            var (kernelItemSet, fullItemSet) = GetNextItemSets(itemSet, symbol);
+            var stepItemSet = new StepItemSet<TSymbol>(kernelItemSet, fullItemSet);
 
-            var shiftReduceItems = afterSymbolItemSets.Kernel.Aggregate(
-                ShiftReduceItems.Empty,
-                (shiftReduce, item) => item.HasSymbolAhead() 
-                    ? shiftReduce with { ShiftItems = shiftReduce.ShiftItems.Add(item) }
-                    : shiftReduce with { ReduceItems = shiftReduce.ReduceItems.Add(item) });
-
-            var (shiftItems, reduceItems) = shiftReduceItems;
-            
-            var validationResult = Validate(shiftItems, reduceItems);
-            if (validationResult.HasValue)
-                return Option.None<Step<TSymbol>, BuilderError>(validationResult.ValueOrFailure());
-
-            return CalculateStep(symbolAhead, afterSymbolItemSets.Full, shiftReduceItems)
-                .Some<Step<TSymbol>, BuilderError>();
+            return Validate(stepItemSet).Map(_ => CalculateStep(symbol, stepItemSet));
         }
 
-        private Step<TSymbol> CalculateStep(
-            Symbol<TSymbol> symbolAhead,
-            ItemSet<TSymbol> afterSymbolFullItemSet,
-            ShiftReduceItems shiftReduceItems)
-        {
-            var (shiftItems, reduceItems) = shiftReduceItems;
-            var isShift = shiftItems.Any();
-
+        private Step<TSymbol> CalculateStep(Symbol<TSymbol> symbol, StepItemSet<TSymbol> stepItemSet)
+        {            
+            var isShift = stepItemSet.ShiftItems.Any();
             if (isShift)
-                return CreateShift(symbolAhead, afterSymbolFullItemSet);
+                return CreateShift(symbol, stepItemSet.ItemSet);
 
-            var productionItem = reduceItems[0];
-            return productionItem.IsRoot
-                ? CreateAccept(symbolAhead, afterSymbolFullItemSet)
-                : CreateReduce(symbolAhead, afterSymbolFullItemSet, productionItem);
+            return stepItemSet.ReduceItems[0].IsStart
+                ? CreateAccept(symbol, stepItemSet.ItemSet)
+                : CreateReduce(symbol, stepItemSet);
         }
 
-        private Step<TSymbol> CreateShift(Symbol<TSymbol> symbolAhead, ItemSet<TSymbol> afterSymbolFullItemSet)
+        private Step<TSymbol> CreateShift(Symbol<TSymbol> symbol, ItemSet<TSymbol> itemSet)
         {
-            var shift = StateReducerFactory.Shift(symbolAhead, afterSymbolFullItemSet, _observer.ShiftListener);
+            var shift = StateReducerFactory.Shift(symbol, itemSet, _observer.ShiftListener);
 
-            return Step<TSymbol>.CreateShiftStep(symbolAhead, shift, afterSymbolFullItemSet);
+            return new Step<TSymbol>(StepType.Shift, symbol, shift, itemSet);
         }
 
-        private Step<TSymbol> CreateReduce(
-            Symbol<TSymbol> symbolAhead,
-            ItemSet<TSymbol> afterSymbolFullItemSet,
-            Item<TSymbol> reducedItem)
+        private Step<TSymbol> CreateReduce(Symbol<TSymbol> symbol, StepItemSet<TSymbol> stepItemSet)
         {
-            var reduce = StateReducerFactory.Reduce(symbolAhead, afterSymbolFullItemSet, reducedItem, _observer.ReduceListener);
+            var reduce = StateReducerFactory.Reduce(symbol, stepItemSet.ItemSet, stepItemSet.ReduceItems[0], _observer.ReduceListener);
             
-            return Step<TSymbol>.CreateReduceStep(symbolAhead, reduce, afterSymbolFullItemSet, reducedItem);
+            return new Step<TSymbol>(StepType.Reduce, symbol, reduce, stepItemSet.ItemSet);
         }
 
-        private Step<TSymbol> CreateAccept(Symbol<TSymbol> symbolAhead, ItemSet<TSymbol> afterSymbolFullItemSet)
+        private Step<TSymbol> CreateAccept(Symbol<TSymbol> symbol, ItemSet<TSymbol> nextItemSet)
         {
-            var accept = StateReducerFactory.Accept(symbolAhead, afterSymbolFullItemSet, _observer.AcceptListener);
+            var accept = StateReducerFactory.Accept(symbol, nextItemSet, _observer.AcceptListener);
 
-            return Step<TSymbol>.CreateAcceptStep(symbolAhead, accept, afterSymbolFullItemSet);
+            return new Step<TSymbol>(StepType.Accept, symbol, accept, nextItemSet);
         }
 
-        private KernelFullItemSets<TSymbol> GetItemSetsAfterSymbol(ItemSet<TSymbol> stateItemSet, Symbol<TSymbol> symbolAhead)
+        private (ItemSet<TSymbol> Kernel, ItemSet<TSymbol> Full) GetNextItemSets(ItemSet<TSymbol> itemSet, Symbol<TSymbol> symbol)
         {
-            var kernelItemSet = stateItemSet.StepForward(symbolAhead);
-            var closureItemSet = _closureGenerator.GetClosureItems(kernelItemSet);
+            var kernelItemSet = itemSet.StepForward(symbol);
+            var closureItemSet = _closureGenerator.Produce(kernelItemSet);
             var fullItemSet = kernelItemSet.Include(closureItemSet);
 
-            return new KernelFullItemSets<TSymbol>(kernelItemSet, fullItemSet);
+            return (kernelItemSet, fullItemSet);
         }
 
-        private static Option<BuilderError> Validate(
-            ImmutableList<Item<TSymbol>> shiftItems,
-            ImmutableList<Item<TSymbol>> reduceItems)
+        private static Option<VoidValue, BuilderError> Validate(StepItemSet<TSymbol> stepItemSet)
         {
+            var (shiftItems, reduceItems) = (stepItemSet.ShiftItems, stepItemSet.ReduceItems);
+
             if (shiftItems.Any() && reduceItems.Any())
-                return BuilderError.ShiftReduceConflict.Some();
+                return Option.None<VoidValue, BuilderError>(BuilderError.ShiftReduceConflict);
 
             var reducedSymbols = reduceItems.Select(item => item.ForSymbol).Distinct();
             if (reducedSymbols.Count() > 1)
-                return BuilderError.ReduceConflict.Some();
+                return Option.None<VoidValue, BuilderError>(BuilderError.ReduceConflict);
 
-            return Option.None<BuilderError>();
-        }
-
-        private readonly record struct ShiftReduceItems(
-            ImmutableList<Item<TSymbol>> ShiftItems,
-            ImmutableList<Item<TSymbol>> ReduceItems)
-        {
-            public static readonly ShiftReduceItems Empty = new ShiftReduceItems(
-                ImmutableList<Item<TSymbol>>.Empty,
-                ImmutableList<Item<TSymbol>>.Empty);
+            return VoidValue.Instance.Some<VoidValue, BuilderError>();
         }
     }
 }

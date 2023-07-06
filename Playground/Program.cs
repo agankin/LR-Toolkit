@@ -9,9 +9,9 @@ using static Symbol;
 
 var grammar = new GrammarBuilder<Symbol>(S)
 {
-    [S] = Prod(A, A),
+    [S] = Prod(A),
     [A] = Prod(a, A),
-    [A] = Prod(b)
+    [A] = Prod(a)
 }.Build();
 
 var lookaheadFactory = new OneLookaheadFactory<Symbol>(grammar);
@@ -23,15 +23,20 @@ parserOrError.Map(parser =>
     Console.WriteLine(formattedGraph);
 
     Console.WriteLine("Run Parser:");
-    parser.Run(new[] { a, b, a, b })
-       .MatchNone(error => Console.WriteLine($"{error.State} {error.Transition} -> Error: {error.Type}"));
+    parser.Run(new[] { a, a })
+        .MatchNone(error =>
+        {
+            Console.WriteLine($"ERROR: {error.Type}");
+            Console.WriteLine($"    FROM STATE: {error.State}");
+            Console.WriteLine($"    BY TRANSITION: {error.Transition}");
+        });
 
-    return new VoidValue();
+    return VoidValue.Instance;
 })
 .Or(error =>
 {
     Console.WriteLine($"Error: {error}");
-    return new VoidValue();
+    return VoidValue.Instance;
 });
 
 Console.Write("To exit press any key...");

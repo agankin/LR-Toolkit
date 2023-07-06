@@ -9,10 +9,10 @@ namespace LRToolkit.Parsing
 
         public ItemSet(IReadOnlySet<Item<TSymbol>> items) => _items = items;
 
-        public IReadOnlySet<Symbol<TSymbol>> GetSymbolsAhead()
+        public IEnumerable<Symbol<TSymbol>> GetSymbolsAhead()
         {
             var symbolsAhead = _items.OnlySome(item => item.GetSymbolAhead());
-            return new HashSet<Symbol<TSymbol>>(symbolsAhead);
+            return symbolsAhead;
         }
 
         public ItemSet<TSymbol> StepForward(Symbol<TSymbol> symbol)

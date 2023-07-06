@@ -2,6 +2,7 @@
 using DFAutomaton;
 using Optional;
 using Optional.Unsafe;
+using LRToolkit.Utilities;
 
 namespace LRToolkit.Parsing
 {
@@ -11,23 +12,20 @@ namespace LRToolkit.Parsing
         private readonly ILookaheadFactory<TSymbol> _lookaheadFactory;
         private readonly ParserTransitionsObserver<TSymbol> _observer;
 
-        private readonly ClosureItemSetGenerator<TSymbol> _closureGenerator;
+        private readonly ClosureProducer<TSymbol> _closureProducer;
         private readonly StepCalculator<TSymbol> _stepCalculator;
-        private readonly StateForStepBuilder<TSymbol> _stateForStepBuilder;
+        private readonly StateForStepBuilder<TSymbol> _stateBuilder;
 
-        private ParserBuilder(
-            Grammar<TSymbol> grammar,
-            ILookaheadFactory<TSymbol> lookaheadFactory,
-            ParserTransitionsObserver<TSymbol> observer)
+        private ParserBuilder(Grammar<TSymbol> grammar, ILookaheadFactory<TSymbol> lookaheadFactory, ParserTransitionsObserver<TSymbol> observer)
         {
             _grammar = grammar;
             _lookaheadFactory = lookaheadFactory;
             _observer = observer;
 
-            _closureGenerator = new ClosureItemSetGenerator<TSymbol>(grammar, lookaheadFactory);
+            _closureProducer = new ClosureProducer<TSymbol>(grammar, lookaheadFactory);
             
-            _stepCalculator = new StepCalculator<TSymbol>(_closureGenerator, _observer);
-            _stateForStepBuilder = new StateForStepBuilder<TSymbol>(BuildForSymbolsAhead, _observer);
+            _stepCalculator = new StepCalculator<TSymbol>(_closureProducer, _observer);
+            _stateBuilder = new StateForStepBuilder<TSymbol>(BuildNext, _observer);
         }
 
         public static Option<Parser<TSymbol>, BuilderError> Build(
@@ -51,50 +49,37 @@ namespace LRToolkit.Parsing
             var startState = new State<TSymbol>(automatonBuilder.StartState, startItemSet);
             startState.Tag = startItemSet;
 
-            var statesLog = StatesLog<TSymbol>.Empty.Push(startState);
-            var errorOption = BuildForSymbolsAhead(startState, statesLog);
-
-            return errorOption.Map(Option.None<Parser<TSymbol>, BuilderError>)
-                .ValueOr(() =>
+            return BuildNext(startState)
+                .Map(_ => 
                 {
-                    var automaton = automatonBuilder.Build();
-
-                    return new Parser<TSymbol>(automaton.ValueOrFailure(), startItemSet)
-                        .Some<Parser<TSymbol>, BuilderError>();
+                    var automaton = automatonBuilder.Build(c => c.TurnOffAnyReachesAcceptedValidation()).ValueOrFailure();
+                    
+                    return new Parser<TSymbol>(automaton, startItemSet);
                 });
         }
 
-        private Option<BuilderError> BuildForSymbolsAhead(
-            State<TSymbol> fromState,
-            StatesLog<TSymbol> statesLog)
+        private Option<VoidValue, BuilderError> BuildNext(State<TSymbol> state)
         {
-            var symbolsAhead = fromState.FullItemSet.GetSymbolsAhead();
+            var symbols = state.FullItemSet.GetSymbolsAhead();
 
-            return symbolsAhead.Aggregate(
-                Option.None<BuilderError>(),
-                (errorOption, symbolAhead) => errorOption.Match(
-                    error => error.Some(),
-                    () => BuildForSymbolAhead(fromState, symbolAhead, statesLog)));
+            return symbols.Aggregate(
+                VoidValue.Instance.Some<VoidValue, BuilderError>(),
+                (error, symbol) => error.FlatMap(_ => BuildNext(state, symbol)));
         }
 
-        private Option<BuilderError> BuildForSymbolAhead(
-            State<TSymbol> fromState,
-            Symbol<TSymbol> symbolAhead,
-            StatesLog<TSymbol> statesLog)
+        private Option<VoidValue, BuilderError> BuildNext(State<TSymbol> state, Symbol<TSymbol> symbol)
         {
-            return _stepCalculator.GetForSymbolAhead(fromState.FullItemSet, symbolAhead)
-                .Match(
-                    step => _stateForStepBuilder.BuildStepState(fromState, step, statesLog),
-                    Option.Some);
+            return _stepCalculator.GetStep(state.FullItemSet, symbol)
+                .FlatMap(step => _stateBuilder.BuildNext(state, step));
         }
 
         private ItemSet<TSymbol> CreateStartItemSet()
         {
             var start = _grammar.Start;
-            var startLookahead = NoLookahead<TSymbol>.Instance;
+            var startLookahead = _lookaheadFactory.GetStart();
 
-            var kernelItem = Item<TSymbol>.ForRoot(start, startLookahead);
-            var closureItems = _closureGenerator.GetClosureItems(kernelItem);
+            var kernelItem = Item<TSymbol>.ForStart(start, startLookahead);
+            var closureItems = _closureProducer.Produce(kernelItem);
             var fullItemSet = kernelItem.Include(closureItems);
 
             return fullItemSet;

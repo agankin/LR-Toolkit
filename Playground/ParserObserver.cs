@@ -6,32 +6,25 @@ namespace Playground
     {
         public static ParserTransitionsObserver<TSymbol> Configure<TSymbol>(ParserTransitionsObserver<TSymbol> observer)
             where TSymbol : notnull =>
-            observer.OnShift((parsingState, symbolAhead, transitingTo) =>
+            observer.OnShift((parsingState, symbolAhead, transitingToId) =>
             {
                 var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
 
-                Console.WriteLine($"[{Format(parsedSymbols)}] + {symbolAhead} --- SHIFT ---> State {transitingTo.Id}");
+                Console.WriteLine($"[{Format(parsedSymbols)}] + {symbolAhead} --- SHIFT ---> State {transitingToId}");
             })
-            .OnReduce((parsingState, symbolAhead, rule, transitingTo) =>
+            .OnReduce((parsingState, symbolAhead, rule, transitingToId) =>
             {
                 var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
                 var reducedToSymbol = rule.ForSymbol;
 
-                Console.WriteLine($"[{Format(parsedSymbols)}] + {symbolAhead} --- REDUCE {rule} ---> State {transitingTo.Id}");
+                Console.WriteLine($"[{Format(parsedSymbols)}] + {symbolAhead} --- REDUCE {rule} ---> State {transitingToId}");
             })
-            .OnGoToAfterReduce((parsingState, symbolAhead, transitingTo) =>
+            .OnAccept((parsingState, transitingToId) =>
             {
                 var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
                 var parsedSymbolsDescription = string.Join(", ", parsedSymbols);
                 
-                Console.WriteLine($"[{Format(parsedSymbols)}] + {symbolAhead} --- GO TO AFTER REDUCE ---> State {transitingTo.Id}");
-            })
-            .OnAccept((parsingState, transitingTo) =>
-            {
-                var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
-                var parsedSymbolsDescription = string.Join(", ", parsedSymbols);
-                
-                Console.WriteLine($"[{Format(parsedSymbols)}] --- ACCEPT ---> State {transitingTo.Id}");
+                Console.WriteLine($"[{Format(parsedSymbols)}] --- ACCEPT ---> State {transitingToId}");
             });
 
         private static string Format<TSymbol>(IEnumerable<ParsedSymbol<TSymbol>> parsedSymbols) =>

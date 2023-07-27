@@ -6,7 +6,5 @@ public enum SymbolType
 
     Lookahead,
 
-    ReducedSymbol,
-
     End
 }

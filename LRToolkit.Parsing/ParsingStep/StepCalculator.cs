@@ -5,15 +5,11 @@ namespace LRToolkit.Parsing
 {
     internal class StepCalculator<TSymbol> where TSymbol : notnull
     {
-        private readonly ClosureProducer<TSymbol> _closureGenerator;
-        private readonly ParserTransitionsObserver<TSymbol> _observer;
+        private readonly ClosureProducer<TSymbol> _closureProducer;
 
-        public StepCalculator(
-            ClosureProducer<TSymbol> closureGenerator,
-            ParserTransitionsObserver<TSymbol> observer)
+        public StepCalculator(ClosureProducer<TSymbol> closureProducer)
         {
-            _closureGenerator = closureGenerator;
-            _observer = observer;
+            _closureProducer = closureProducer;
         }
 
         public Option<Step<TSymbol>, BuilderError> GetStep(ItemSet<TSymbol> itemSet, Symbol<TSymbol> symbol)
@@ -35,31 +31,22 @@ namespace LRToolkit.Parsing
                 : CreateReduce(symbol, stepItemSet);
         }
 
-        private Step<TSymbol> CreateShift(Symbol<TSymbol> symbol, ItemSet<TSymbol> itemSet)
-        {
-            var shift = StateReducerFactory.Shift(symbol, itemSet, _observer.ShiftListener);
-
-            return new Step<TSymbol>(StepType.Shift, symbol, shift, itemSet);
-        }
+        private Step<TSymbol> CreateShift(Symbol<TSymbol> symbol, ItemSet<TSymbol> itemSet) =>
+            new Step<TSymbol>(StepType.Shift, symbol, itemSet, Option.None<Item<TSymbol>>());
 
         private Step<TSymbol> CreateReduce(Symbol<TSymbol> symbol, StepItemSet<TSymbol> stepItemSet)
         {
-            var reduce = StateReducerFactory.Reduce(symbol, stepItemSet.ItemSet, stepItemSet.ReduceItems[0], _observer.ReduceListener);
-            
-            return new Step<TSymbol>(StepType.Reduce, symbol, reduce, stepItemSet.ItemSet);
+            var reducedItem = stepItemSet.ReduceItems[0];            
+            return new Step<TSymbol>(StepType.Reduce, symbol, stepItemSet.ItemSet, reducedItem.Some());
         }
 
-        private Step<TSymbol> CreateAccept(Symbol<TSymbol> symbol, ItemSet<TSymbol> nextItemSet)
-        {
-            var accept = StateReducerFactory.Accept(symbol, nextItemSet, _observer.AcceptListener);
-
-            return new Step<TSymbol>(StepType.Accept, symbol, accept, nextItemSet);
-        }
+        private Step<TSymbol> CreateAccept(Symbol<TSymbol> symbol, ItemSet<TSymbol> nextItemSet) =>
+            new Step<TSymbol>(StepType.Accept, symbol, nextItemSet, Option.None<Item<TSymbol>>());
 
         private (ItemSet<TSymbol> Kernel, ItemSet<TSymbol> Full) GetNextItemSets(ItemSet<TSymbol> itemSet, Symbol<TSymbol> symbol)
         {
             var kernelItemSet = itemSet.StepForward(symbol);
-            var closureItemSet = _closureGenerator.Produce(kernelItemSet);
+            var closureItemSet = _closureProducer.Produce(kernelItemSet);
             var fullItemSet = kernelItemSet.Include(closureItemSet);
 
             return (kernelItemSet, fullItemSet);

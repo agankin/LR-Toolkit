@@ -1,22 +1,26 @@
 ﻿using DFAutomaton;
 using LRToolkit.Utilities;
+using Optional;
 using Optional.Unsafe;
 
 namespace LRToolkit.Parsing
 {
-    internal static class StateReducerFactory
+    internal class StateReducerFactory<TSymbol> where TSymbol : notnull
     {
-        public static StateReducer<Symbol<TSymbol>, ParsingState<TSymbol>> Shift<TSymbol>(
-            Symbol<TSymbol> symbol,
-            ItemSet<TSymbol> nextItemSet,
-            ShiftListener<TSymbol> listener)
-            where TSymbol : notnull
-        {
-            return (automatonRunState, parsingState) =>
-            {
-                listener(parsingState, symbol, automatonRunState.TransitingTo);
-                var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
+        private readonly ParserTransitionsObserver<TSymbol> _observer;
 
+        public StateReducerFactory(ParserTransitionsObserver<TSymbol> observer) => _observer = observer;
+
+        public ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> Shift(Symbol<TSymbol> symbol)
+        {
+            return automatonState =>
+            {
+                var (parsingState, nextStateOption, _) = automatonState;
+                var nextState = nextStateOption.ValueOrFailure();
+
+                _observer.ShiftListener(parsingState, symbol, nextState.Id);
+                
+                var (parsedSymbols, priorStates) = parsingState;
                 return parsingState with
                 {
                     ParsedSymbols = symbol.Type switch
@@ -24,24 +28,19 @@ namespace LRToolkit.Parsing
                         SymbolType.Symbol => parsedSymbols.Shift(symbol.Value.ValueOrFailure()),
                         _ => parsedSymbols
                     },
-                    ParsedSymbolsItemSets = parsedSymbolsItemSets.Push(nextItemSet),
+                    PriorStates = priorStates.Push(nextState),
                 };
             };
         }
 
-        public static StateReducer<Symbol<TSymbol>, ParsingState<TSymbol>> Reduce<TSymbol>(
-            Symbol<TSymbol> symbol,
-            ItemSet<TSymbol> nextItemSet,
-            Item<TSymbol> reducedItem,
-            ReduceListener<TSymbol> listener)
-            where TSymbol : notnull
+        public Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> Reduce(Symbol<TSymbol> symbol, Item<TSymbol> reducedItem)
         {
-            return (automatonRunState, parsingState) =>
+            return automatonState =>
             {
-                listener(parsingState, symbol, reducedItem, automatonRunState.TransitingTo);
+                var (parsingState, _, emitNext) = automatonState;
 
                 var reducedToSymbol = reducedItem.ForSymbol;
-                var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
+                var (parsedSymbols, priorStates) = parsingState;
 
                 var (newParsedSymbols, reducedParsedSymbol) = symbol.Type switch
                 {
@@ -51,60 +50,39 @@ namespace LRToolkit.Parsing
                     _ => parsedSymbols.Reduce(reducedItem)
                 };
                 
-                var newParsedSymbolsItemSets = parsedSymbolsItemSets
-                    .Push(nextItemSet)
-                    .PopSkip(reducedItem.Count);
+                var reducedPriorStates = priorStates.PopSkip(reducedItem.Count);
+                var goToState = reducedPriorStates.Peek();
 
-                var goToAfterReduce = newParsedSymbolsItemSets.Peek();
-                var nextEmitForGoToAfterReduce = Symbol<TSymbol>.CreateReduced(reducedToSymbol, goToAfterReduce);
-                automatonRunState.EmitNext(nextEmitForGoToAfterReduce);
-                
-                return parsingState with
+                _observer.ReduceListener(parsingState, symbol, reducedItem, goToState.Id);
+
+                var reducedParsingState = parsingState with
                 {
                     ParsedSymbols = newParsedSymbols,
-                    ParsedSymbolsItemSets = newParsedSymbolsItemSets
+                    PriorStates = reducedPriorStates
                 };
+
+                return new(reducedParsingState, goToState.Some());
             };
         }
 
-        public static StateReducer<Symbol<TSymbol>, ParsingState<TSymbol>> Accept<TSymbol>(
-            Symbol<TSymbol> symbol,
-            ItemSet<TSymbol> nextItemSet,
-            AcceptListener<TSymbol> listener)
-            where TSymbol : notnull
+        public ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> Accept(Symbol<TSymbol> symbol)
         {
-            return (automatonRunState, parsingState) =>
+            return automatonState =>
             {
-                listener(parsingState, automatonRunState.TransitingTo);
-                var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
+                var (parsingState, nextStateOption, _) = automatonState;
+                var nextState = nextStateOption.ValueOrFailure();
+                
+                _observer.AcceptListener(parsingState, nextState.Id);
 
+                var (parsedSymbols, _) = parsingState;
                 return parsingState with
                 {
                     ParsedSymbols = symbol.Type switch
                     {
                         SymbolType.Symbol => parsedSymbols.Shift(symbol.Value.ValueOrFailure()),
                         _ => parsedSymbols
-                    },
-                    ParsedSymbolsItemSets = parsedSymbolsItemSets.Push(nextItemSet)
+                    }
                 };
-            };
-        }
-
-        public static StateReducer<Symbol<TSymbol>, ParsingState<TSymbol>> GoToAfterReduce<TSymbol>(
-            Item<TSymbol> reducedItem,
-            GoToAfterReduceListener<TSymbol> listener)
-            where TSymbol : notnull
-        {
-            var symbol = Symbol<TSymbol>.Create(reducedItem.ForSymbol);
-
-            return (automatonRunState, parsingState) =>
-            {
-                listener(parsingState, symbol, automatonRunState.TransitingTo);
-                
-                automatonRunState.EmitNext(symbol);
-                reducedItem.Lookahead.ForEach(automatonRunState.EmitNext);
-
-                return parsingState;
             };
         }
     }

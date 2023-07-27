@@ -15,21 +15,13 @@ namespace LRToolkit.Parsing
             _lookaheadFactory = lookaheadFactory;
         }
 
-        public ItemSet<TSymbol> Produce(Item<TSymbol> kernelItem)
+        public IReadOnlySet<Item<TSymbol>> Produce(Item<TSymbol> kernelItem)
         {
             var symbolAheadOption = GetAhead(kernelItem);
-            var producedClosures = symbolAheadOption.Map(symbolAhead => ProduceClosures(symbolAhead).ToHashSet())
+            var closures = symbolAheadOption.Map(symbolAhead => ProduceClosures(symbolAhead).ToHashSet())
                 .ValueOr(new HashSet<Item<TSymbol>>());
 
-            return new ItemSet<TSymbol>(producedClosures);
-        }
-
-        public ItemSet<TSymbol> Produce(ItemSet<TSymbol> kernelItemSet)
-        {
-            var symbolsAhead = kernelItemSet.OnlySome(GetAhead).Distinct();
-            var nextSymbolsItems = symbolsAhead.SelectMany(ProduceClosures).ToHashSet();
-
-            return new ItemSet<TSymbol>(nextSymbolsItems);
+            return closures;
         }
 
         private Option<SymbolAhead> GetAhead(Item<TSymbol> item)

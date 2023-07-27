@@ -24,7 +24,7 @@ namespace LRToolkit.Parsing
 
             _closureProducer = new ClosureProducer<TSymbol>(grammar, lookaheadFactory);
             
-            _stepCalculator = new StepCalculator<TSymbol>(_closureProducer, _observer);
+            _stepCalculator = new StepCalculator<TSymbol>(_closureProducer);
             _stateBuilder = new StateForStepBuilder<TSymbol>(BuildNext, _observer);
         }
 
@@ -46,32 +46,31 @@ namespace LRToolkit.Parsing
             var automatonBuilder = AutomatonBuilder<Symbol<TSymbol>, ParsingState<TSymbol>>.Create();
             var startItemSet = CreateStartItemSet();
 
-            var startState = new State<TSymbol>(automatonBuilder.StartState, startItemSet);
+            var startState = State<TSymbol>.CreateStart(automatonBuilder.Start, startItemSet);
             startState.Tag = startItemSet;
 
-            return BuildNext(startState)
-                .Map(_ => 
+            return BuildNext(startState).Match(
+                Option.None<Parser<TSymbol>, BuilderError>,
+                () => 
                 {
                     var automaton = automatonBuilder.Build(c => c.TurnOffAnyReachesAcceptedValidation()).ValueOrFailure();
-                    
-                    return new Parser<TSymbol>(automaton, startItemSet);
+                    return new Parser<TSymbol>(automaton, startState).Some<Parser<TSymbol>, BuilderError>();
                 });
         }
 
-        private Option<VoidValue, BuilderError> BuildNext(State<TSymbol> state)
+        private Option<BuilderError> BuildNext(State<TSymbol> state)
         {
             var symbols = state.FullItemSet.GetSymbolsAhead();
 
             return symbols.Aggregate(
-                VoidValue.Instance.Some<VoidValue, BuilderError>(),
-                (error, symbol) => error.FlatMap(_ => BuildNext(state, symbol)));
+                Option.None<BuilderError>(),
+                (error, symbol) => error.MapNone(() => BuildNext(state, symbol)));
         }
 
-        private Option<VoidValue, BuilderError> BuildNext(State<TSymbol> state, Symbol<TSymbol> symbol)
-        {
-            return _stepCalculator.GetStep(state.FullItemSet, symbol)
-                .FlatMap(step => _stateBuilder.BuildNext(state, step));
-        }
+        private Option<BuilderError> BuildNext(State<TSymbol> state, Symbol<TSymbol> symbol) =>
+            _stepCalculator.GetStep(state.FullItemSet, symbol).Match(
+                step => _stateBuilder.BuildNext(state, step),
+                error => error.Some());
 
         private ItemSet<TSymbol> CreateStartItemSet()
         {

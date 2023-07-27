@@ -4,48 +4,57 @@ namespace LRToolkit.Parsing
 {
     public class State<TSymbol> where TSymbol : notnull
     {
-        private readonly State<Symbol<TSymbol>, ParsingState<TSymbol>> _dfaState;
-
-        public State(State<Symbol<TSymbol>, ParsingState<TSymbol>> dfaState, ItemSet<TSymbol> fullItemSet)
+        private State(
+            State<Symbol<TSymbol>, ParsingState<TSymbol>> dfaState,
+            ItemSet<TSymbol> fullItemSet,
+            StateItemSetDict<TSymbol> stateItemSetDict)
         {
-            _dfaState = dfaState;
+            DFAState = dfaState;
             FullItemSet = fullItemSet;
+            StateItemSetDict = stateItemSetDict;
         }
 
-        public IState<Symbol<TSymbol>, ParsingState<TSymbol>> DFAState => _dfaState;
+        public State<Symbol<TSymbol>, ParsingState<TSymbol>> DFAState { get; }
 
         public ItemSet<TSymbol> FullItemSet { get; }
 
+        public long Id => DFAState.Id;
+
         public object? Tag
         {
-            get => _dfaState.Tag;
-            set => _dfaState.Tag = value;
+            get => DFAState.Tag;
+            set => DFAState.Tag = value;
         }
 
-        public State<TSymbol> ToNewState(
+        internal StateItemSetDict<TSymbol> StateItemSetDict { get; }
+
+        public static State<TSymbol> CreateStart(State<Symbol<TSymbol>, ParsingState<TSymbol>> dfaState, ItemSet<TSymbol> fullItemSet) =>
+            new State<TSymbol>(dfaState, fullItemSet, new());
+
+        public State<TSymbol> ToNewFixedState(
             Symbol<TSymbol> symbolAhead,
-            ItemSet<TSymbol> stateItemSet,
-            StateReducer<Symbol<TSymbol>, ParsingState<TSymbol>> reducer)
+            ItemSet<TSymbol> fullItemSet,
+            ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> reduce)
         {
-            var newDFAState = _dfaState.ToNewState(symbolAhead, reducer);
-            return new State<TSymbol>(newDFAState, stateItemSet);
+            var newDFAState = DFAState.ToNewFixedState(symbolAhead, reduce);
+            return new State<TSymbol>(newDFAState, fullItemSet, StateItemSetDict);
         }
 
-        public void LinkState(
-            Symbol<TSymbol> symbolAhead,
-            State<TSymbol> toState,
-            StateReducer<Symbol<TSymbol>, ParsingState<TSymbol>> reducer)
+        public void LinkFixedState(Symbol<TSymbol> symbolAhead, State<TSymbol> toState, ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> reduce) =>
+            DFAState.LinkFixedState(symbolAhead, toState.DFAState, reduce);
+
+        public void LinkDynamicState(Symbol<TSymbol> symbol, Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> reduce)
         {
-            _dfaState.LinkState(symbolAhead, toState._dfaState, reducer);
+            DFAState.LinkDynamic(symbol, reduce);
         }
 
-        public AcceptedStateHandle<Symbol<TSymbol>, ParsingState<TSymbol>> ToNewAccepted(
+        public AcceptedState<Symbol<TSymbol>, ParsingState<TSymbol>> ToNewFixedAccepted(
             Symbol<TSymbol> symbol,
-            StateReducer<Symbol<TSymbol>, ParsingState<TSymbol>> reducer)
+            ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> reduce)
         {
-            return _dfaState.ToNewAccepted(symbol, reducer);
+            return DFAState.ToNewFixedAccepted(symbol, reduce);
         }
 
-        public override string? ToString() => _dfaState.ToString();
+        public override string? ToString() => DFAState.ToString();
     }
 }

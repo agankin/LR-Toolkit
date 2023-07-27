@@ -3,7 +3,7 @@ using Optional.Collections;
 
 namespace LRToolkit.Parsing
 {
-    internal class StateByItemSet<TSymbol> where TSymbol : notnull
+    internal class StateItemSetDict<TSymbol> where TSymbol : notnull
     {
         private readonly Dictionary<ItemSet<TSymbol>, State<TSymbol>> _stateByItemSet = new();
 

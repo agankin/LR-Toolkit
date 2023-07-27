@@ -11,7 +11,7 @@ namespace LRToolkit.Parsing
 
         public IEnumerable<Symbol<TSymbol>> GetSymbolsAhead()
         {
-            var symbolsAhead = _items.OnlySome(item => item.GetSymbolAhead());
+            var symbolsAhead = _items.OnlySome(item => item.GetSymbolAhead()).Distinct();
             return symbolsAhead;
         }
 
@@ -27,11 +27,9 @@ namespace LRToolkit.Parsing
 
         IEnumerator IEnumerable.GetEnumerator() => _items.GetEnumerator();
 
-        public bool Equals(ItemSet<TSymbol>? other) =>
-            other != null && _items.SetEquals(other._items);
+        public bool Equals(ItemSet<TSymbol>? other) => other != null && _items.SetEquals(other._items);
 
-        public override bool Equals(object? obj) =>
-            obj is ItemSet<TSymbol> other && Equals(other);
+        public override bool Equals(object? obj) => obj is ItemSet<TSymbol> other && Equals(other);
 
         public override int GetHashCode() => Hash.CalculateFNV(_items);
 

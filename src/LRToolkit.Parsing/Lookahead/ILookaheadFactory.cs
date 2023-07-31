@@ -1,13 +1,12 @@
 ﻿using Optional;
 
-namespace LRToolkit.Parsing
-{
-    public interface ILookaheadFactory<TSymbol> where TSymbol : notnull
-    {
-        ILookahead<TSymbol> GetStart();
-        
-        Option<ILookahead<TSymbol>> GetAhead(Item<TSymbol> item);
+namespace LRToolkit.Parsing;
 
-        IEnumerable<ILookahead<TSymbol>> Produce(ILookahead<TSymbol> symbolLookahead);
-    }
+public interface ILookaheadFactory<TSymbol> where TSymbol : notnull
+{
+    ILookahead<TSymbol> GetStart();
+    
+    Option<ILookahead<TSymbol>> GetAhead(Item<TSymbol> item);
+
+    IEnumerable<ILookahead<TSymbol>> Produce(ILookahead<TSymbol> symbolLookahead);
 }

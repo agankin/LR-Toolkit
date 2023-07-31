@@ -1,7 +1,6 @@
-﻿namespace LRToolkit.Utilities
+﻿namespace LRToolkit.Utilities;
+
+public readonly struct VoidValue
 {
-    public readonly struct VoidValue
-    {
-        public static readonly VoidValue Instance = new VoidValue();
-    }
+    public static readonly VoidValue Instance = new VoidValue();
 }

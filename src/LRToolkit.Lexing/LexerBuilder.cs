@@ -1,26 +1,25 @@
 ﻿using LRToolkit.Utilities;
 
-namespace LRToolkit.Lexing
+namespace LRToolkit.Lexing;
+
+public class LexerBuilder<TToken>
 {
-    public class LexerBuilder<TToken>
+    private readonly IList<TokenParser<TToken>> _parsers = new List<TokenParser<TToken>>();
+
+    public LexerBuilder(params TokenParser<TToken>[] matchers)
+        => matchers.ForEach(_parsers.Add);
+
+    public LexerBuilder<TToken> AddParser(TokenParser<TToken> matcher)
     {
-        private readonly IList<TokenParser<TToken>> _parsers = new List<TokenParser<TToken>>();
+        _parsers.Add(matcher);
 
-        public LexerBuilder(params TokenParser<TToken>[] matchers)
-            => matchers.ForEach(_parsers.Add);
+        return this;
+    }
 
-        public LexerBuilder<TToken> AddParser(TokenParser<TToken> matcher)
-        {
-            _parsers.Add(matcher);
+    public Lexer<TToken> Build()
+    {
+        var parsingChain = _parsers.Chain();
 
-            return this;
-        }
-
-        public Lexer<TToken> Build()
-        {
-            var parsingChain = _parsers.Chain();
-
-            return new Lexer<TToken>(parsingChain);
-        }
+        return new Lexer<TToken>(parsingChain);
     }
 }

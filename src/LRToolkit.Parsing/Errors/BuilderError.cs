@@ -1,9 +1,8 @@
-﻿namespace LRToolkit.Parsing
-{
-    public enum BuilderError
-    {
-        ShiftReduceConflict = 1,
+﻿namespace LRToolkit.Parsing;
 
-        ReduceConflict
-    }
+public enum BuilderError
+{
+    ShiftReduceConflict = 1,
+
+    ReduceConflict
 }

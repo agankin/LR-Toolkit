@@ -1,12 +1,11 @@
 ﻿using Optional;
 
-namespace LRToolkit.Parsing
-{
-    internal record Step<TSymbol>(
-        StepType Type,
-        Symbol<TSymbol> Symbol,
-        ItemSet<TSymbol> NextItemSet,
-        Option<Item<TSymbol>> ReducedItem
-    )
-    where TSymbol : notnull;
-}
+namespace LRToolkit.Parsing;
+
+internal record Step<TSymbol>(
+    StepType Type,
+    Symbol<TSymbol> Symbol,
+    ItemSet<TSymbol> NextItemSet,
+    Option<Item<TSymbol>> ReducedItem
+)
+where TSymbol : notnull;

@@ -1,11 +1,10 @@
-﻿namespace LRToolkit.Utilities
+﻿namespace LRToolkit.Utilities;
+
+public class UnsupportedEnumValueException<TEnum> : Exception
+    where TEnum : Enum
 {
-    public class UnsupportedEnumValueException<TEnum> : Exception
-        where TEnum : Enum
+    public UnsupportedEnumValueException(TEnum @enum)
+        : base($"Unsupported enum {typeof(TEnum).Name} value: {@enum}.")
     {
-        public UnsupportedEnumValueException(TEnum @enum)
-            : base($"Unsupported enum {typeof(TEnum).Name} value: {@enum}.")
-        {
-        }
     }
 }

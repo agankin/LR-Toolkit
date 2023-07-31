@@ -1,8 +1,7 @@
-﻿namespace LRToolkit.GrammarDefinition
+﻿namespace LRToolkit.GrammarDefinition;
+
+public static class GrammarUtils
 {
-    public static class GrammarUtils
-    {
-        public static Production<TSymbol> Prod<TSymbol>(params TSymbol[] symbols)
-            => new Production<TSymbol>(symbols);
-    }
+    public static Production<TSymbol> Prod<TSymbol>(params TSymbol[] symbols)
+        => new Production<TSymbol>(symbols);
 }

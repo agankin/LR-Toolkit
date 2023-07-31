@@ -1,7 +1,6 @@
-﻿namespace LRToolkit.Lexing
+﻿namespace LRToolkit.Lexing;
+
+public class LexemError
 {
-    public class LexemError
-    {
-        public int Position { get; }
-    }
+    public int Position { get; }
 }

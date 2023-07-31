@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.Lexing", "LRToolkit.Lexing\LRToolkit.Lexing.csproj", "{FF0A2D60-DE77-4E1C-8027-923B396AB2E5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.Lexing", "src\LRToolkit.Lexing\LRToolkit.Lexing.csproj", "{FF0A2D60-DE77-4E1C-8027-923B396AB2E5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.Utilities", "LRToolkit.Utilities\LRToolkit.Utilities.csproj", "{9C4535CA-7B92-4221-9065-4E9FC6E68308}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.Utilities", "src\LRToolkit.Utilities\LRToolkit.Utilities.csproj", "{9C4535CA-7B92-4221-9065-4E9FC6E68308}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.GrammarDefinition", "LRToolkit.GrammarDefinition\LRToolkit.GrammarDefinition.csproj", "{D7A3A5D0-3F68-4648-92C9-761969D1590B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.GrammarDefinition", "src\LRToolkit.GrammarDefinition\LRToolkit.GrammarDefinition.csproj", "{D7A3A5D0-3F68-4648-92C9-761969D1590B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.Parsing", "LRToolkit.Parsing\LRToolkit.Parsing.csproj", "{B949E1DB-CC36-4AF3-A0D6-D5DD816661F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.Parsing", "src\LRToolkit.Parsing\LRToolkit.Parsing.csproj", "{B949E1DB-CC36-4AF3-A0D6-D5DD816661F1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Playground", "Playground\Playground.csproj", "{D6DC56AC-0C06-4552-BF65-9B10A30CAB96}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Playground", "samples\Playground\Playground.csproj", "{D6DC56AC-0C06-4552-BF65-9B10A30CAB96}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Playground", "Playground", "{7CE04BDA-301D-4EE1-979A-ECF18D99D732}"
 EndProject

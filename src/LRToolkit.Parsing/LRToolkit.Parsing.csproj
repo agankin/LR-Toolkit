@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <Reference Include="DFAutomaton">
-      <HintPath>..\Dependencies\DFAutomaton.dll</HintPath>
+      <HintPath>..\..\Dependencies\DFAutomaton.dll</HintPath>
     </Reference>
   </ItemGroup>
 

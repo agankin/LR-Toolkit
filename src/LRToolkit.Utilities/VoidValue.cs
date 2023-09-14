@@ -1,6 +1,3 @@
 ﻿namespace LRToolkit.Utilities;
 
-public readonly struct VoidValue
-{
-    public static readonly VoidValue Instance = new VoidValue();
-}
+public readonly record struct Nothing();

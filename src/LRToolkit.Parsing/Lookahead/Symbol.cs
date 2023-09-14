@@ -15,6 +15,10 @@ public readonly record struct Symbol<TSymbol>(
 
     public static Symbol<TSymbol> End() => new Symbol<TSymbol>(SymbolType.End, Option.None<TSymbol>());
 
+    public bool Equals(Symbol<TSymbol> other) => Value == other.Value;
+
+    public override int GetHashCode() => Value.GetHashCode();
+
     public override string? ToString()
     {
         return Type switch

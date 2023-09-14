@@ -52,17 +52,17 @@ internal class StepCalculator<TSymbol> where TSymbol : notnull
         return (kernelItemSet, fullItemSet);
     }
 
-    private static Option<VoidValue, BuilderError> Validate(StepItemSet<TSymbol> stepItemSet)
+    private static Option<Nothing, BuilderError> Validate(StepItemSet<TSymbol> stepItemSet)
     {
         var (shiftItems, reduceItems) = (stepItemSet.ShiftItems, stepItemSet.ReduceItems);
 
         if (shiftItems.Any() && reduceItems.Any())
-            return Option.None<VoidValue, BuilderError>(BuilderError.ShiftReduceConflict);
+            return Option.None<Nothing, BuilderError>(BuilderError.ShiftReduceConflict);
 
         var reducedSymbols = reduceItems.Select(item => item.ForSymbol).Distinct();
         if (reducedSymbols.Count() > 1)
-            return Option.None<VoidValue, BuilderError>(BuilderError.ReduceConflict);
+            return Option.None<Nothing, BuilderError>(BuilderError.ReduceConflict);
 
-        return VoidValue.Instance.Some<VoidValue, BuilderError>();
+        return new Nothing().Some<Nothing, BuilderError>();
     }
 }

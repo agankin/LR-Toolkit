@@ -2,9 +2,9 @@
 
 public readonly record struct TextInput(string Text, int Position = 0)
 {
-    public required string Text { get; init; } = Text ?? throw new ArgumentNullException(nameof(Text));
+    public string Text { get; private init; } = Text ?? throw new ArgumentNullException(nameof(Text));
 
-    public required int Position { get; init; } = ValidatePosition(Position, Text);
+    public int Position { get; init; } = ValidatePosition(Position, Text);
 
     private static int ValidatePosition(int position, string text)
     {

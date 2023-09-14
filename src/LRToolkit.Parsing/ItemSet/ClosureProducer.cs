@@ -1,4 +1,5 @@
 ﻿using LRToolkit.GrammarDefinition;
+using LRToolkit.Utilities;
 using Optional;
 
 namespace LRToolkit.Parsing;
@@ -32,12 +33,12 @@ internal class ClosureProducer<TSymbol> where TSymbol : notnull
     }
 
     private IEnumerable<Item<TSymbol>> ProduceClosures(SymbolAhead symbolAhead) =>
-        ProduceClosures(symbolAhead, new HashSet<TSymbol>());
+        ProduceClosures(symbolAhead, new HashSet<SymbolAhead>());
 
-    private IEnumerable<Item<TSymbol>> ProduceClosures(SymbolAhead symbolAhead, ISet<TSymbol> processedSymbols)
+    private IEnumerable<Item<TSymbol>> ProduceClosures(SymbolAhead symbolAhead, ISet<SymbolAhead> processedAheads)
     {
         var (symbol, lookahead) = symbolAhead;
-        processedSymbols.Add(symbol);
+        processedAheads.Add(symbolAhead);
         
         var symbolProductions = _grammar[symbol];
         var producedLookaheads = _lookaheadFactory.Produce(lookahead).ToList();
@@ -45,15 +46,17 @@ internal class ClosureProducer<TSymbol> where TSymbol : notnull
         var closures = symbolProductions
             .SelectMany(rule => producedLookaheads.Select(lookahead => Item<TSymbol>.FromRule(rule, lookahead)));
 
-        var producedSymbols = symbolProductions.Select(rule => rule.Production.First)
-            .Where(symbol => !processedSymbols.Contains(symbol))
+        var notProcessedAheads = closures.OnlySome(GetSymbolAhead)
+            .Where(symbolAhead => !processedAheads.Contains(symbolAhead))
             .Distinct();
-        var producedClosures = producedSymbols
-            .SelectMany(symbol => producedLookaheads.Select(lookahead => new SymbolAhead(symbol, lookahead)))
-            .SelectMany(symbolAhead => ProduceClosures(symbolAhead, processedSymbols));
+
+        var producedClosures = notProcessedAheads.SelectMany(symbolAhead => ProduceClosures(symbolAhead, processedAheads));
 
         return closures.Concat(producedClosures);
     }
+
+    private Option<SymbolAhead> GetSymbolAhead(Item<TSymbol> item) =>
+        _lookaheadFactory.GetAhead(item).Map(lookahead => new SymbolAhead(item.Production.First, lookahead));
 
     private readonly record struct SymbolAhead(
         TSymbol Symbol,

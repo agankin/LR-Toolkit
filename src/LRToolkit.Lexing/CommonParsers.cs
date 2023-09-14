@@ -3,25 +3,35 @@ using Optional;
 
 namespace LRToolkit.Lexing;
 
-public static class CommonParsers
+public class RegexParser
 {
-    public static TokenParser<TToken> Regex<TToken>(string regexPattern, TToken token)
+    private readonly Regex _regex;
+
+    public RegexParser(Regex regex) => _regex = regex;
+
+    public static RegexParser Regex(string regexPattern)
     {
         var regex = new Regex(regexPattern);
-
-        return input => regex.Match(input.Text, input.Position).GetLexem(token);
+        return new(regex);
+    }
+    
+    public LexemParser<TToken> Is<TToken>(TToken token)
+    {
+        return input =>
+        {
+            var match = _regex.Match(input.Text, input.Position);  
+            return GetLexem(match, token);
+        };
     }
 
-    private static Option<Lexem<TToken>> GetLexem<TToken>(this Match match, TToken token)
-        => match.Success
-            ? MakeLexem(token, match)
-            : Option.None<Lexem<TToken>>();
+    private static Option<Lexem<TToken>> GetLexem<TToken>(Match match, TToken token)
+        => match.Success ? MakeLexem(token, match) : Option.None<Lexem<TToken>>();
 
     private static Option<Lexem<TToken>> MakeLexem<TToken>(TToken token, Match match)
     {
         var (value, position) = (match.Value, match.Index);
         var lexem = new Lexem<TToken>(token, value, position);
 
-        return Option.Some(lexem);
+        return lexem.Some();
     }
 }

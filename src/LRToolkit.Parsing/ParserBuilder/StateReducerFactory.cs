@@ -50,7 +50,7 @@ internal class StateReducerFactory<TSymbol> where TSymbol : notnull
                 _ => parsedSymbols.Reduce(reducedItem)
             };
             
-            var reducedPriorStates = priorStates.PopSkip(reducedItem.Count);
+            var reducedPriorStates = priorStates.PopSkip(reducedItem.Count - 1);
             var goToState = reducedPriorStates.Peek();
 
             _observer.ReduceListener(parsingState, symbol, reducedItem, goToState.Id);
@@ -60,6 +60,10 @@ internal class StateReducerFactory<TSymbol> where TSymbol : notnull
                 ParsedSymbols = newParsedSymbols,
                 PriorStates = reducedPriorStates
             };
+
+            emitNext(Symbol<TSymbol>.Create(reducedToSymbol));
+            foreach (var symbol in reducedItem.Lookahead)
+                emitNext(symbol);
 
             return new(reducedParsingState, goToState.Some());
         };

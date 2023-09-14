@@ -4,11 +4,9 @@ namespace LRToolkit.GrammarDefinition;
 
 public class Grammar<TSymbol>
 {
-    private readonly IReadOnlyDictionary<TSymbol, IReadOnlyList<ProductionRule<TSymbol>>> _productions;
+    private readonly IReadOnlyDictionary<TSymbol, ProductionRuleCollection<TSymbol>> _productions;
 
-    public Grammar(
-        TSymbol start,
-        IReadOnlyDictionary<TSymbol, IReadOnlyList<ProductionRule<TSymbol>>> productions)
+    public Grammar(TSymbol start, IReadOnlyDictionary<TSymbol, ProductionRuleCollection<TSymbol>> productions)
     {
         Start = start;
         _productions = productions;
@@ -17,5 +15,5 @@ public class Grammar<TSymbol>
     public TSymbol Start { get; }
 
     public IReadOnlyList<ProductionRule<TSymbol>> this[TSymbol symbol] =>
-        _productions.GetValueOrNone(symbol).ValueOr(Array.Empty<ProductionRule<TSymbol>>);
+        _productions.GetValueOrNone(symbol).ValueOr(new ProductionRuleCollection<TSymbol>(symbol));
 }

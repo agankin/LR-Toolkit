@@ -21,13 +21,36 @@ public class OneLookaheadFactory<TSymbol> : ILookaheadFactory<TSymbol> where TSy
     {
         var lookaheadSymbol = lookahead[0].ValueOrFailure();
 
-        IEnumerable<ILookahead<TSymbol>> SelectFirstSymbolsInProductions(TSymbol symbol) =>
-            _grammar[symbol].Select(rule => new OneLookahead<TSymbol>(rule.Production.First));
+        IEnumerable<ILookahead<TSymbol>> ProduceLookaheads(TSymbol symbol) =>
+            ProduceSymbols(symbol, symbol, new HashSet<TSymbol>())
+                .Distinct()
+                .Select(symbol => new OneLookahead<TSymbol>(symbol))
+                .ToList();
 
-        var lookaheadProductions = lookaheadSymbol.Value
-            .Map(SelectFirstSymbolsInProductions)
-            .ValueOr(() => Enumerable.Empty<ILookahead<TSymbol>>());
+        var producedLookaheads = lookaheadSymbol.Value
+            .Map(ProduceLookaheads)
+            .ValueOr(Enumerable.Empty<ILookahead<TSymbol>>);
             
-        return lookaheadProductions.Prepend(lookahead).Distinct();
+        return producedLookaheads.Prepend(lookahead);
+    }
+
+    private IEnumerable<TSymbol> ProduceSymbols(TSymbol symbol, TSymbol exceptSymbol, ISet<TSymbol> processedSymbols)
+    {
+        if (processedSymbols.Contains(symbol))
+            yield break;
+
+        if(!symbol.Equals(exceptSymbol))
+            yield return symbol;
+
+        processedSymbols.Add(symbol);
+
+        var productions = _grammar[symbol];
+        var producedSymbols = productions.SelectMany(production => ProduceSymbols(production.Production.First, exceptSymbol, processedSymbols));
+
+        foreach (var producedSymbol in producedSymbols)
+        {
+            if (!symbol.Equals(producedSymbol))
+                yield return producedSymbol;
+        }
     }
 }

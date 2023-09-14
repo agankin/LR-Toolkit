@@ -1,19 +1,10 @@
 ﻿namespace LRToolkit.Lexing;
 
-public readonly record struct Lexem<TToken>
+public readonly record struct Lexem<TToken>(TToken Token, string Value, int Position)
 {
-    public Lexem(TToken token, string value, int position)
-    {
-        Token = token;
-        Value = value ?? throw new ArgumentNullException(nameof(value));
-        Position = position >= 0
-            ? position 
-            : throw new ArgumentException($"{nameof(position)} arg cannot be less than zero.", nameof(position));
-    }
+    public string Value { get; } = Value  ?? throw new ArgumentNullException(nameof(Value));
 
-    public TToken Token { get; }
-
-    public string Value { get; }
-
-    public int Position { get; }
+    public int Position { get; } = Position >= 0
+        ? Position 
+        : throw new ArgumentException($"{nameof(Position)} arg cannot be less than zero.", nameof(Position));
 }

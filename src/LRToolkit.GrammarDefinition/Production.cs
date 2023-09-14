@@ -30,7 +30,7 @@ public class Production<TSymbol> : IReadOnlyCollection<TSymbol>, IEquatable<Prod
 
     public override bool Equals(object? obj) => obj is Production<TSymbol> other && Equals(other);
 
-    public override int GetHashCode() => Hash.CalculateFNV(this);
+    public override int GetHashCode() => Hash.FNV(this);
 
     public override string ToString() => string.Join(", ", _productionSymbols);
 }

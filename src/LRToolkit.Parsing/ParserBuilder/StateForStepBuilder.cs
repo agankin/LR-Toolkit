@@ -38,6 +38,7 @@ internal class StateForStepBuilder<TSymbol> where TSymbol : notnull
             toState => 
             {
                 state.LinkFixedState(symbol, toState, reduce);
+                
                 return Option.None<BuilderError>();
             },
             () =>

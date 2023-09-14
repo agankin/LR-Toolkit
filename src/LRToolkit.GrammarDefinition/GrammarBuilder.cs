@@ -24,9 +24,7 @@ public class GrammarBuilder<TSymbol> where TSymbol : notnull
 
     public Grammar<TSymbol> Build()
     {
-        var productions = _productions.ToDictionary(
-            entry => entry.Key,
-            entry => (IReadOnlyList<ProductionRule<TSymbol>>)entry.Value.ToList());
+        var productions = _productions.ToDictionary(entry => entry.Key, entry => entry.Value);
 
         return new Grammar<TSymbol>(Start, productions);
     }

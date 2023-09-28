@@ -20,13 +20,13 @@ internal class StateReducerFactory<TSymbol> where TSymbol : notnull
 
             _observer.ShiftListener(parsingState, symbol, nextState.Id);
             
-            var (parsedSymbols, priorStates) = parsingState;
+            var (parsingStack, priorStates) = parsingState;
             return parsingState with
             {
-                ParsedSymbols = symbol.Type switch
+                ParsingStack = symbol.Type switch
                 {
-                    SymbolType.Symbol => parsedSymbols.Shift(symbol.Value.ValueOrFailure()),
-                    _ => parsedSymbols
+                    SymbolType.Symbol => parsingStack.Shift(symbol),
+                    _ => parsingStack
                 },
                 PriorStates = priorStates.Push(nextState),
             };
@@ -40,32 +40,32 @@ internal class StateReducerFactory<TSymbol> where TSymbol : notnull
             var (parsingState, _, emitNext) = automatonState;
 
             var reducedToSymbol = reducedItem.ForSymbol;
-            var (parsedSymbols, priorStates) = parsingState;
+            var (parsingStack, priorStates) = parsingState;
 
-            var (newParsedSymbols, reducedParsedSymbol) = symbol.Type switch
+            var (nextParsingStack, node) = symbol.Type switch
             {
-                SymbolType.Symbol => parsedSymbols
-                    .Shift(symbol.Value.ValueOrFailure())
+                SymbolType.Symbol => parsingStack
+                    .Shift(symbol)
                     .Reduce(reducedItem), 
-                _ => parsedSymbols.Reduce(reducedItem)
+                _ => parsingStack.Reduce(reducedItem)
             };
             
-            var reducedPriorStates = priorStates.PopSkip(reducedItem.Count - 1);
-            var goToState = reducedPriorStates.Peek();
+            var nextPriorStates = priorStates.PopSkip(reducedItem.Count - 1);
+            var goToState = nextPriorStates.Peek();
 
             _observer.ReduceListener(parsingState, symbol, reducedItem, goToState.Id);
 
-            var reducedParsingState = parsingState with
+            var nextParsingState = parsingState with
             {
-                ParsedSymbols = newParsedSymbols,
-                PriorStates = reducedPriorStates
+                ParsingStack = nextParsingStack,
+                PriorStates = nextPriorStates
             };
 
             emitNext(Symbol<TSymbol>.Create(reducedToSymbol));
             foreach (var symbol in reducedItem.Lookahead)
                 emitNext(symbol);
 
-            return new(reducedParsingState, goToState.Some());
+            return new(nextParsingState, goToState.Some());
         };
     }
 
@@ -78,13 +78,13 @@ internal class StateReducerFactory<TSymbol> where TSymbol : notnull
             
             _observer.AcceptListener(parsingState, nextState.Id);
 
-            var (parsedSymbols, _) = parsingState;
+            var (parsingStack, _) = parsingState;
             return parsingState with
             {
-                ParsedSymbols = symbol.Type switch
+                ParsingStack = symbol.Type switch
                 {
-                    SymbolType.Symbol => parsedSymbols.Shift(symbol.Value.ValueOrFailure()),
-                    _ => parsedSymbols
+                    SymbolType.Symbol => parsingStack.Shift(symbol),
+                    _ => parsingStack
                 }
             };
         };

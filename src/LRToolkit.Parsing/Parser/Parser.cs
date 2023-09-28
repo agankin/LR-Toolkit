@@ -1,4 +1,5 @@
 ﻿using DFAutomaton;
+using LRToolkit.Lexing;
 using Optional;
 
 namespace LRToolkit.Parsing;
@@ -16,10 +17,12 @@ public class Parser<TSymbol> where TSymbol : notnull
 
     public IState<Symbol<TSymbol>, ParsingState<TSymbol>> StartState => _automaton.Start;
 
-    public Option<ParsingState<TSymbol>, AutomatonError<Symbol<TSymbol>, ParsingState<TSymbol>>> Run(IEnumerable<TSymbol> symbols)
+    public Option<ParsingState<TSymbol>, AutomatonError<Symbol<TSymbol>, ParsingState<TSymbol>>> Run(IEnumerable<Lexem<TSymbol>> lexems)
     {
         var startValue = ParsingState<TSymbol>.CreateNew(_startState);
-        var symbolsWithEnd = symbols.Select(Symbol<TSymbol>.Create).Append(Symbol<TSymbol>.End());
+        var symbolsWithEnd = lexems
+            .Select(Symbol<TSymbol>.Create)
+            .Append(Symbol<TSymbol>.End());
 
         return _automaton.Run(startValue, symbolsWithEnd);
     }

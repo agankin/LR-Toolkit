@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LRToolkit.GrammarDefinition\LRToolkit.GrammarDefinition.csproj" />
+    <ProjectReference Include="..\LRToolkit.Lexing\LRToolkit.Lexing.csproj" />
   </ItemGroup>
 
   <ItemGroup>

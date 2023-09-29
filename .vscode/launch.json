@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Playground/bin/Debug/net7.0/Playground.exe",
+            "program": "${workspaceFolder}/samples/Playground/bin/Debug/net7.0/Playground.exe",
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,

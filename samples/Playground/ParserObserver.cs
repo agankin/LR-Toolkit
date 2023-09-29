@@ -8,25 +8,24 @@ public static class ParserObserver
         where TSymbol : notnull =>
         observer.OnShift((parsingState, symbolAhead, transitingToId) =>
         {
-            var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
+            var (parsingStack, _) = parsingState;
 
-            Console.WriteLine($"[{Format(parsedSymbols)}] + {symbolAhead} --- SHIFT ---> State {transitingToId}");
+            Console.WriteLine($"[{Format(parsingStack)}] + {symbolAhead} --- SHIFT ---> State {transitingToId}");
         })
         .OnReduce((parsingState, symbolAhead, rule, transitingToId) =>
         {
-            var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
+            var (parsingStack, _) = parsingState;
             var reducedToSymbol = rule.ForSymbol;
 
-            Console.WriteLine($"[{Format(parsedSymbols)}] + {symbolAhead} --- REDUCE {rule} ---> State {transitingToId}");
+            Console.WriteLine($"[{Format(parsingStack)}] + {symbolAhead} --- REDUCE {rule} ---> State {transitingToId}");
         })
         .OnAccept((parsingState, transitingToId) =>
         {
-            var (parsedSymbols, parsedSymbolsItemSets) = parsingState;
-            var parsedSymbolsDescription = string.Join(", ", parsedSymbols);
+            var (parsingStack, _) = parsingState;
             
-            Console.WriteLine($"[{Format(parsedSymbols)}] --- ACCEPT ---> State {transitingToId}");
+            Console.WriteLine($"[{Format(parsingStack)}] --- ACCEPT ---> State {transitingToId}");
         });
 
-    private static string Format<TSymbol>(IEnumerable<ParsedSymbol<TSymbol>> parsedSymbols) =>
-        string.Join(", ", parsedSymbols.Select(symbol => symbol.Symbol));
+    private static string Format<TSymbol>(IEnumerable<ParsingTreeNode<TSymbol>> node) =>
+        string.Join(", ", node.Select(symbol => symbol.Symbol));
 }

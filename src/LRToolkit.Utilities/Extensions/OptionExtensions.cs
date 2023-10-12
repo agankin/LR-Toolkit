@@ -14,6 +14,6 @@ public static class OptionExtensions
         return valueOption.Map(value => comparer.Equals(value, valueToCompare)).ValueOr(false);
     }
 
-    public static IEnumerable<TResult> OnlySome<TItem, TResult>(this IEnumerable<TItem> items, Func<TItem, Option<TResult>> selector) =>
+    public static IEnumerable<TResult> SelectOnlySome<TItem, TResult>(this IEnumerable<TItem> items, Func<TItem, Option<TResult>> selector) =>
         items.Select(selector).Where(option => option.HasValue).Select(item => item.ValueOrFailure());
 }

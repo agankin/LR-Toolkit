@@ -18,10 +18,10 @@ internal static class StateItemSetExtensions
         return new ItemSet<TSymbol>(resultItems);
     }
 
-    public static ItemSet<TSymbol> Produce<TSymbol>(this ClosureProducer<TSymbol> closureProducer, ItemSet<TSymbol> itemSet)
+    public static ItemSet<TSymbol> Produce<TSymbol>(this ClosureProducer<TSymbol> closureProducer, ItemSet<TSymbol> kernelItemSet)
         where TSymbol : notnull
     {
-        var closures = itemSet.SelectMany(closureProducer.Produce).ToHashSet();
+        var closures = kernelItemSet.SelectMany(closureProducer.Produce).ToHashSet();
         return new ItemSet<TSymbol>(closures);
     }
 }

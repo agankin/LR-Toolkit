@@ -44,9 +44,9 @@ internal class ClosureProducer<TSymbol> where TSymbol : notnull
         var producedLookaheads = _lookaheadFactory.Produce(lookahead).ToList();
         
         var closures = symbolProductions
-            .SelectMany(rule => producedLookaheads.Select(lookahead => Item<TSymbol>.FromRule(rule, lookahead)));
+            .SelectMany(rule => producedLookaheads.Select(lookahead => Item<TSymbol>.ClosureFromRule(rule, lookahead)));
 
-        var notProcessedAheads = closures.OnlySome(GetSymbolAhead)
+        var notProcessedAheads = closures.SelectOnlySome(GetSymbolAhead)
             .Where(symbolAhead => !processedAheads.Contains(symbolAhead))
             .Distinct();
 

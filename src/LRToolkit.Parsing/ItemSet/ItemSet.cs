@@ -11,14 +11,14 @@ public class ItemSet<TSymbol> : IEquatable<ItemSet<TSymbol>>, IEnumerable<Item<T
 
     public IEnumerable<Symbol<TSymbol>> GetSymbolsAhead()
     {
-        var symbolsAhead = _items.OnlySome(item => item.GetSymbolAhead()).Distinct();
+        var symbolsAhead = _items.SelectOnlySome(item => item.GetSymbolAhead()).Distinct();
         return symbolsAhead;
     }
 
     public ItemSet<TSymbol> StepForward(Symbol<TSymbol> symbol)
     {
         var symbolAheadItems = _items.Where(item => item.GetSymbolAhead().SomeEquals(symbol));
-        var items = symbolAheadItems.OnlySome(item => item.StepForward()).ToHashSet();
+        var items = symbolAheadItems.SelectOnlySome(item => item.StepForward()).ToHashSet();
 
         return new ItemSet<TSymbol>(items);
     }
@@ -33,5 +33,16 @@ public class ItemSet<TSymbol> : IEquatable<ItemSet<TSymbol>>, IEnumerable<Item<T
 
     public override int GetHashCode() => Hash.FNV(_items);
 
-    public override string ToString() => string.Join(", ", _items.Select(item => $"[{item}]"));
+    public override string ToString()
+    {
+        var nl = Environment.NewLine;
+        var dl = $"{nl}    ";
+        
+        var kernels = string.Join(dl, _items.Where(item => item.IsKernel));
+        var closures = string.Join(dl, _items.Where(item => !item.IsKernel));
+
+        return closures.Any()
+            ? $"[{dl}{kernels}{nl}closures:{dl}{closures}{nl}]"
+            : $"[{dl}{kernels}{nl}]";
+    }
 }

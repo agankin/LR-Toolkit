@@ -26,6 +26,6 @@ public static class ParserObserver
             Console.WriteLine($"[{Format(parsingStack)}] --- ACCEPT ---> State {transitingToId}");
         });
 
-    private static string Format<TSymbol>(IEnumerable<ParsingTreeNode<TSymbol>> node) =>
+    private static string Format<TSymbol>(IEnumerable<ParsingTreeNode<TSymbol>> node) where TSymbol : notnull =>
         string.Join(", ", node.Select(symbol => symbol.Symbol));
 }

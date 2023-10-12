@@ -6,12 +6,13 @@ namespace LRToolkit.Parsing;
 
 public record Item<TSymbol> where TSymbol : notnull
 {
-    private Item(TSymbol forSymbol, Production<TSymbol> production, ILookahead<TSymbol> lookahead, int position = 0)
+    private Item(TSymbol forSymbol, Production<TSymbol> production, ILookahead<TSymbol> lookahead, int position, bool isKernel)
     {
         ForSymbol = forSymbol;
         Production = production;
         Lookahead = lookahead;
         Position = position;
+        IsKernel = isKernel;
     }
 
     public TSymbol ForSymbol { get; init; }
@@ -28,17 +29,19 @@ public record Item<TSymbol> where TSymbol : notnull
 
     public bool IsStart { get; init; }
 
+    public bool IsKernel { get; init; }
+
     public static Item<TSymbol> ForStart(TSymbol start, ILookahead<TSymbol> lookahead)
     {
         var production = new Production<TSymbol>(start);
 
-        return new Item<TSymbol>(start, production, lookahead, position: 0)
+        return new Item<TSymbol>(start, production, lookahead, position: 0, isKernel: true)
         {
             IsStart = true
         };
     }
 
-    public static Item<TSymbol> FromRule(ProductionRule<TSymbol> rule, ILookahead<TSymbol> lookahead)
+    public static Item<TSymbol> ClosureFromRule(ProductionRule<TSymbol> rule, ILookahead<TSymbol> lookahead)
     {
         if (rule == null)
             throw new ArgumentNullException(nameof(rule));
@@ -46,7 +49,7 @@ public record Item<TSymbol> where TSymbol : notnull
         var forSymbol = rule.ForSymbol;
         var production = rule.Production;
 
-        return new Item<TSymbol>(forSymbol, production, lookahead, position: 0);
+        return new Item<TSymbol>(forSymbol, production, lookahead, position: 0, isKernel: false);
     }
 
     public Option<Symbol<TSymbol>> GetSymbolAhead(int lookaheadPosition = 0)
@@ -59,7 +62,7 @@ public record Item<TSymbol> where TSymbol : notnull
     }
 
     public Option<Item<TSymbol>> StepForward() => HasSymbolAhead()
-        ? (this with { Position = Position + 1 }).Some()
+        ? (this with { Position = Position + 1, IsKernel = true }).Some()
         : Option.None<Item<TSymbol>>();
 
     public bool HasSymbolAhead() => Position < Count;

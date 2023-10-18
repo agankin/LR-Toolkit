@@ -3,46 +3,56 @@ using LRToolkit.Utilities;
 
 namespace LRToolkit.Parsing;
 
-public class ItemSet<TSymbol> : IEquatable<ItemSet<TSymbol>>, IEnumerable<Item<TSymbol>> where TSymbol : notnull
+public readonly record struct ItemSet<TSymbol>(
+    IReadOnlySet<Item<TSymbol>> Kernels,
+    IReadOnlySet<Item<TSymbol>> Closures
+) : IEnumerable<Item<TSymbol>> where TSymbol : notnull
 {
-    private readonly IReadOnlySet<Item<TSymbol>> _items;
-
-    public ItemSet(IReadOnlySet<Item<TSymbol>> items) => _items = items;
-
     public IEnumerable<Symbol<TSymbol>> GetSymbolsAhead()
     {
-        var symbolsAhead = _items.SelectOnlySome(item => item.GetSymbolAhead()).Distinct();
-        return symbolsAhead;
+        var fromKernels = Kernels.SelectOnlySome(item => item.GetSymbolAhead()).Distinct();
+        var fromClosures = Closures.SelectOnlySome(item => item.GetSymbolAhead()).Distinct();
+        
+        return fromKernels.Concat(fromClosures);
     }
 
-    public ItemSet<TSymbol> StepForward(Symbol<TSymbol> symbol)
+    public IReadOnlySet<Item<TSymbol>> StepForward(Symbol<TSymbol> symbolAhead)
     {
-        var symbolAheadItems = _items.Where(item => item.GetSymbolAhead().SomeEquals(symbol));
-        var items = symbolAheadItems.SelectOnlySome(item => item.StepForward()).ToHashSet();
+        var kernelsHavingAhead = Kernels.Where(item => item.GetSymbolAhead().SomeEquals(symbolAhead));
+        var closuresHavingAhead = Closures.Where(item => item.GetSymbolAhead().SomeEquals(symbolAhead));
 
-        return new ItemSet<TSymbol>(items);
+        var stepForwardKernels = kernelsHavingAhead.Concat(closuresHavingAhead).SelectOnlySome(item => item.StepForward()).ToHashSet();
+
+        return stepForwardKernels;
     }
 
-    public IEnumerator<Item<TSymbol>> GetEnumerator() => _items.GetEnumerator();
+    public IEnumerator<Item<TSymbol>> GetEnumerator() => AsEnumerable().GetEnumerator();
 
-    IEnumerator IEnumerable.GetEnumerator() => _items.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => AsEnumerable().GetEnumerator();
 
-    public bool Equals(ItemSet<TSymbol>? other) => other != null && _items.SetEquals(other._items);
+    public bool Equals(ItemSet<TSymbol> other) => Kernels.SetEquals(other.Kernels);
 
-    public override bool Equals(object? obj) => obj is ItemSet<TSymbol> other && Equals(other);
-
-    public override int GetHashCode() => Hash.FNV(_items);
+    public override int GetHashCode() => Hash.FNV(Kernels);
 
     public override string ToString()
     {
         var nl = Environment.NewLine;
         var dl = $"{nl}    ";
         
-        var kernels = string.Join(dl, _items.Where(item => item.IsKernel));
-        var closures = string.Join(dl, _items.Where(item => !item.IsKernel));
+        var kernels = string.Join(dl, Kernels);
+        var closures = string.Join(dl, Closures);
 
         return closures.Any()
             ? $"[{dl}{kernels}{nl}closures:{dl}{closures}{nl}]"
             : $"[{dl}{kernels}{nl}]";
+    }
+
+    private IEnumerable<Item<TSymbol>> AsEnumerable()
+    {
+        foreach (var kernel in Kernels)
+            yield return kernel;
+
+        foreach (var closure in Closures)
+            yield return closure;
     }
 }

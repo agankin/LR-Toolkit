@@ -4,11 +4,11 @@ namespace LRToolkit.Parsing;
 
 internal class StepItemSet<TSymbol> where TSymbol : notnull
 {
-    public StepItemSet(ItemSet<TSymbol> kernelItemSet, ItemSet<TSymbol> fullItemSet)
+    public StepItemSet(ItemSet<TSymbol> itemSet)
     {
-        ItemSet = fullItemSet ?? throw new ArgumentNullException(nameof(fullItemSet));
+        ItemSet = itemSet;
 
-        (ShiftItems, ReduceItems) = kernelItemSet.Aggregate(
+        (ShiftItems, ReduceItems) = itemSet.Kernels.Aggregate(
             ShiftReduceItems.Empty,
             (shiftReduce, item) => item.HasSymbolAhead() 
                 ? shiftReduce with { ShiftItems = shiftReduce.ShiftItems.Add(item) }

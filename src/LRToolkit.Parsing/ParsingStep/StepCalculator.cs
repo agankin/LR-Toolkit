@@ -12,44 +12,45 @@ internal class StepCalculator<TSymbol> where TSymbol : notnull
         _closureProducer = closureProducer;
     }
 
-    public Option<Step<TSymbol>, BuilderError> GetStep(ItemSet<TSymbol> itemSet, Symbol<TSymbol> symbol)
+    public Option<Step<TSymbol>, BuilderError> GetStep(ItemSet<TSymbol> itemSet, Symbol<TSymbol> symbolAhead)
     {
-        var (kernelItemSet, fullItemSet) = GetNextItemSets(itemSet, symbol);
-        var stepItemSet = new StepItemSet<TSymbol>(kernelItemSet, fullItemSet);
+        var afterStepForward = GetStepForwardItemSet(itemSet, symbolAhead);
+        var stepItemSet = new StepItemSet<TSymbol>(afterStepForward);
 
-        return Validate(stepItemSet).Map(_ => CalculateStep(symbol, stepItemSet));
+        return Validate(stepItemSet).Map(_ => CalculateStep(symbolAhead, stepItemSet));
     }
 
-    private Step<TSymbol> CalculateStep(Symbol<TSymbol> symbol, StepItemSet<TSymbol> stepItemSet)
+    private Step<TSymbol> CalculateStep(Symbol<TSymbol> symbolAhead, StepItemSet<TSymbol> stepItemSet)
     {            
         var isShift = stepItemSet.ShiftItems.Any();
         if (isShift)
-            return CreateShift(symbol, stepItemSet.ItemSet);
+            return CreateShift(symbolAhead, stepItemSet.ItemSet);
 
         return stepItemSet.ReduceItems[0].IsStart
-            ? CreateAccept(symbol, stepItemSet.ItemSet)
-            : CreateReduce(symbol, stepItemSet);
+            ? CreateAccept(symbolAhead, stepItemSet.ItemSet)
+            : CreateReduce(symbolAhead, stepItemSet);
     }
 
-    private Step<TSymbol> CreateShift(Symbol<TSymbol> symbol, ItemSet<TSymbol> itemSet) =>
-        new Step<TSymbol>(StepType.Shift, symbol, itemSet, Option.None<Item<TSymbol>>());
+    private Step<TSymbol> CreateShift(Symbol<TSymbol> symbolAhead, ItemSet<TSymbol> itemSet) =>
+        new Step<TSymbol>(StepType.Shift, symbolAhead, itemSet, Option.None<Item<TSymbol>>());
 
-    private Step<TSymbol> CreateReduce(Symbol<TSymbol> symbol, StepItemSet<TSymbol> stepItemSet)
+    private Step<TSymbol> CreateReduce(Symbol<TSymbol> symbolAhead, StepItemSet<TSymbol> stepItemSet)
     {
         var reducedItem = stepItemSet.ReduceItems[0];            
-        return new Step<TSymbol>(StepType.Reduce, symbol, stepItemSet.ItemSet, reducedItem.Some());
+        return new Step<TSymbol>(StepType.Reduce, symbolAhead, stepItemSet.ItemSet, reducedItem.Some());
     }
 
-    private Step<TSymbol> CreateAccept(Symbol<TSymbol> symbol, ItemSet<TSymbol> nextItemSet) =>
-        new Step<TSymbol>(StepType.Accept, symbol, nextItemSet, Option.None<Item<TSymbol>>());
+    private Step<TSymbol> CreateAccept(Symbol<TSymbol> symbolAhead, ItemSet<TSymbol> nextItemSet) =>
+        new Step<TSymbol>(StepType.Accept, symbolAhead, nextItemSet, Option.None<Item<TSymbol>>());
 
-    private (ItemSet<TSymbol> Kernel, ItemSet<TSymbol> Full) GetNextItemSets(ItemSet<TSymbol> itemSet, Symbol<TSymbol> symbol)
+    private ItemSet<TSymbol> GetStepForwardItemSet(ItemSet<TSymbol> itemSet, Symbol<TSymbol> symbolAhead)
     {
-        var kernelItemSet = itemSet.StepForward(symbol);
-        var closureItemSet = _closureProducer.Produce(kernelItemSet);
-        var fullItemSet = kernelItemSet.Include(closureItemSet);
+        var kernels = itemSet.StepForward(symbolAhead);
+        var closures = _closureProducer.ProduceClosures(kernels);
+        
+        var next = new ItemSet<TSymbol>(kernels, closures);
 
-        return (kernelItemSet, fullItemSet);
+        return next;
     }
 
     private static Option<Nothing, BuilderError> Validate(StepItemSet<TSymbol> stepItemSet)

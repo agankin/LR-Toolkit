@@ -25,7 +25,7 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
         _closureProducer = new ClosureProducer<TSymbol>(grammar, lookaheadFactory);
         
         _stepCalculator = new StepCalculator<TSymbol>(_closureProducer);
-        _stateBuilder = new StateForStepBuilder<TSymbol>(BuildNext, _observer);
+        _stateBuilder = new StateForStepBuilder<TSymbol>(BuildNextStates, _observer);
     }
 
     public static Option<Parser<TSymbol>, BuilderError> Build(
@@ -49,7 +49,9 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
         var startState = State<TSymbol>.CreateStart(automatonBuilder.Start, startItemSet);
         startState.Tag = startItemSet;
 
-        return BuildNext(startState).Match(
+        var error = BuildNextStates(startState);
+
+        return error.Match(
             Option.None<Parser<TSymbol>, BuilderError>,
             () => 
             {
@@ -58,29 +60,37 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
             });
     }
 
-    private Option<BuilderError> BuildNext(State<TSymbol> state)
+    private Option<BuilderError> BuildNextStates(State<TSymbol> state)
     {
         var symbols = state.FullItemSet.GetSymbolsAhead();
 
         return symbols.Aggregate(
             Option.None<BuilderError>(),
-            (error, symbol) => error.MapNone(() => BuildNext(state, symbol)));
+            (error, symbol) => error.MapNone(() => BuildNextStates(state, symbol)));
     }
 
-    private Option<BuilderError> BuildNext(State<TSymbol> state, Symbol<TSymbol> symbol) =>
-        _stepCalculator.GetStep(state.FullItemSet, symbol).Match(
+    private Option<BuilderError> BuildNextStates(State<TSymbol> state, Symbol<TSymbol> symbolAhead)
+    {
+        var stepOrError = _stepCalculator.GetStep(state.FullItemSet, symbolAhead);
+        
+        var error = stepOrError.Match(
             step => _stateBuilder.BuildNext(state, step),
             error => error.Some());
+
+        return error;
+    }
 
     private ItemSet<TSymbol> CreateStartItemSet()
     {
         var start = _grammar.Start;
         var startLookahead = _lookaheadFactory.GetStart();
 
-        var kernelItem = Item<TSymbol>.ForStart(start, startLookahead);
-        var closureItems = _closureProducer.Produce(kernelItem);
-        var fullItemSet = kernelItem.Include(closureItems);
+        var kernel = Item<TSymbol>.ForStart(start, startLookahead);
+        var kernels = new HashSet<Item<TSymbol>> { kernel };
+        var closures = _closureProducer.Produce(kernel);
+        
+        var itemSet = new ItemSet<TSymbol>(kernels, closures);
 
-        return fullItemSet;
+        return itemSet;
     }
 }

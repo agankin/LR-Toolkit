@@ -7,11 +7,11 @@ public class State<TSymbol> where TSymbol : notnull
     private State(
         State<Symbol<TSymbol>, ParsingState<TSymbol>> dfaState,
         ItemSet<TSymbol> fullItemSet,
-        StateItemSetDict<TSymbol> stateItemSetDict)
+        MergeableStateDict<TSymbol> mergeableStateDict)
     {
         DFAState = dfaState;
         FullItemSet = fullItemSet;
-        StateItemSetDict = stateItemSetDict;
+        MergeableStateDict = mergeableStateDict;
     }
 
     public State<Symbol<TSymbol>, ParsingState<TSymbol>> DFAState { get; }
@@ -26,7 +26,7 @@ public class State<TSymbol> where TSymbol : notnull
         set => DFAState.Tag = value;
     }
 
-    internal StateItemSetDict<TSymbol> StateItemSetDict { get; }
+    internal MergeableStateDict<TSymbol> MergeableStateDict { get; }
 
     public static State<TSymbol> CreateStart(State<Symbol<TSymbol>, ParsingState<TSymbol>> dfaState, ItemSet<TSymbol> fullItemSet) =>
         new State<TSymbol>(dfaState, fullItemSet, new());
@@ -37,7 +37,7 @@ public class State<TSymbol> where TSymbol : notnull
         ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> reduce)
     {
         var newDFAState = DFAState.ToNewFixedState(symbolAhead, reduce);
-        return new State<TSymbol>(newDFAState, fullItemSet, StateItemSetDict);
+        return new State<TSymbol>(newDFAState, fullItemSet, MergeableStateDict);
     }
 
     public void LinkFixedState(Symbol<TSymbol> symbolAhead, State<TSymbol> toState, ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> reduce) =>

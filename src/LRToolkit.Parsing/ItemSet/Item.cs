@@ -1,11 +1,14 @@
 ﻿using LRToolkit.GrammarDefinition;
+using LRToolkit.Utilities;
 using Optional;
 using Optional.Collections;
 
 namespace LRToolkit.Parsing;
 
-public record Item<TSymbol> where TSymbol : notnull
+public sealed record Item<TSymbol> where TSymbol : notnull
 {
+    private readonly Lazy<int> _hashCodeLazy;
+
     private Item(TSymbol forSymbol, Production<TSymbol> production, ILookahead<TSymbol> lookahead, int position, bool isKernel)
     {
         ForSymbol = forSymbol;
@@ -13,6 +16,8 @@ public record Item<TSymbol> where TSymbol : notnull
         Lookahead = lookahead;
         Position = position;
         IsKernel = isKernel;
+
+        _hashCodeLazy = new Lazy<int>(() => Hash.FNV(new object[] { ForSymbol, Production, Lookahead, Position }));
     }
 
     public TSymbol ForSymbol { get; init; }
@@ -68,6 +73,14 @@ public record Item<TSymbol> where TSymbol : notnull
     public bool HasSymbolAhead() => Position < Count;
 
     public bool ProductionFinished() => Position >= Production.Count;
+
+    public bool Equals(Item<TSymbol>? other) => other != null
+        && ForSymbol.Equals(other.ForSymbol)
+        && Production.Equals(other.Production)
+        && Lookahead.Equals(other.Lookahead)
+        && Position == other.Position;
+
+    public override int GetHashCode() => _hashCodeLazy.Value;
 
     public override string ToString() => $"{ForSymbol} -> {GetFormattedProductions()}";
 

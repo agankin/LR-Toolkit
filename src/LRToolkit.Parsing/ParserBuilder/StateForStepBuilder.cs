@@ -28,11 +28,11 @@ internal class StateForStepBuilder<TSymbol> where TSymbol : notnull
 
     private Option<BuilderError> BuildShift(State<TSymbol> state, Step<TSymbol> step)
     {
-        var symbol = step.Symbol;
+        var symbol = step.SymbolAhead;
         var nextItemSet = step.NextItemSet;
 
         var reduce = _reducerFactory.Shift(symbol);
-        var existingToState = state.StateItemSetDict[nextItemSet];
+        var existingToState = state.MergeableStateDict.GetMergeableOrNone(nextItemSet);
 
         return existingToState.Match(
             toState => 
@@ -46,7 +46,7 @@ internal class StateForStepBuilder<TSymbol> where TSymbol : notnull
                 var nextState = state.ToNewFixedState(symbol, nextItemSet, reduce);
                 nextState.Tag = nextItemSet;
 
-                state.StateItemSetDict.Add(nextState, nextItemSet);
+                state.MergeableStateDict.AddNew(nextState, nextItemSet);
                 
                 return _buildNext(nextState);
             });
@@ -54,12 +54,12 @@ internal class StateForStepBuilder<TSymbol> where TSymbol : notnull
 
     private Option<BuilderError> BuildReduce(State<TSymbol> state, Step<TSymbol> step)
     {
-        var symbol = step.Symbol;
+        var symbol = step.SymbolAhead;
         var nextItemSet = step.NextItemSet;
         var reducedItem = step.ReducedItem.ValueOrFailure();
 
         var reduce = _reducerFactory.Reduce(symbol, reducedItem);
-        var existingToState = state.StateItemSetDict[nextItemSet];
+        var existingToState = state.MergeableStateDict.GetMergeableOrNone(nextItemSet);
 
         state.LinkDynamicState(symbol, reduce);
         return Option.None<BuilderError>();
@@ -67,11 +67,11 @@ internal class StateForStepBuilder<TSymbol> where TSymbol : notnull
 
     private Option<BuilderError> BuildAccepted(State<TSymbol> state, Step<TSymbol> step)
     {
-        var symbol = step.Symbol;
+        var symbol = step.SymbolAhead;
         var nextItemSet = step.NextItemSet;
 
         var reduce = _reducerFactory.Accept(symbol);
-        var nextState = state.ToNewFixedAccepted(step.Symbol, reduce);
+        var nextState = state.ToNewFixedAccepted(step.SymbolAhead, reduce);
         nextState.Tag = step.NextItemSet;
 
         return Option.None<BuilderError>();

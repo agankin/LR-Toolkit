@@ -15,22 +15,22 @@ public class RegexParser
         return new(regex);
     }
     
-    public LexemParser<TToken> Is<TToken>(TToken token)
+    public LexemParser<TSymbol> Is<TSymbol>(TSymbol symbol)
     {
         return input =>
         {
             var match = _regex.Match(input.Text, input.Position);  
-            return GetLexem(match, token);
+            return GetLexem(match, symbol);
         };
     }
 
-    private static Option<Lexem<TToken>> GetLexem<TToken>(Match match, TToken token)
-        => match.Success ? MakeLexem(token, match) : Option.None<Lexem<TToken>>();
+    private static Option<Lexem<TSymbol>> GetLexem<TSymbol>(Match match, TSymbol symbol)
+        => match.Success ? MakeLexem(symbol, match) : Option.None<Lexem<TSymbol>>();
 
-    private static Option<Lexem<TToken>> MakeLexem<TToken>(TToken token, Match match)
+    private static Option<Lexem<TSymbol>> MakeLexem<TSymbol>(TSymbol symbol, Match match)
     {
         var (value, position) = (match.Value, match.Index);
-        var lexem = new Lexem<TToken>(token, value, position);
+        var lexem = new Lexem<TSymbol>(symbol, value, position);
 
         return lexem.Some();
     }

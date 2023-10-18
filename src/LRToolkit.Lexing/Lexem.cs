@@ -1,6 +1,6 @@
 ﻿namespace LRToolkit.Lexing;
 
-public readonly record struct Lexem<TToken>(TToken Token, string Value, int Position)
+public readonly record struct Lexem<TSymbol>(TSymbol Symbol, string Value, int Position)
 {
     public string Value { get; } = Value  ?? throw new ArgumentNullException(nameof(Value));
 

@@ -17,7 +17,7 @@ public readonly record struct Symbol<TSymbol> where TSymbol : notnull
     private Symbol(SymbolType type, Lexem<TSymbol> lexem)
     {
         Type = type;
-        Value = lexem.Token.Some();
+        Value = lexem.Symbol.Some();
         Lexem = lexem.Some();
     }
 

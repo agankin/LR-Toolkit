@@ -2,13 +2,13 @@
 
 namespace LRToolkit.Lexing;
 
-public static class LexemValidator<TToken>
+public static class LexemValidator<TSymbol>
 {
-    public static Option<Lexem<TToken>, string> NotEmpty(Lexem<TToken> lexem) =>
+    public static Option<Lexem<TSymbol>, string> NotEmpty(Lexem<TSymbol> lexem) =>
         lexem.GetLength() > 0
-            ? lexem.Some<Lexem<TToken>, string>()
-            : Option.None<Lexem<TToken>, string>("Lexem length cannot be zero.");
+            ? lexem.Some<Lexem<TSymbol>, string>()
+            : Option.None<Lexem<TSymbol>, string>("Lexem length cannot be zero.");
 
-    public static Option<Lexem<TToken>, string> GetUnknownError(TextInput input) =>
-        Option.None<Lexem<TToken>, string>($"Unknown lexem at {input.Position} character.");
+    public static Option<Lexem<TSymbol>, string> GetUnknownError(TextInput input) =>
+        Option.None<Lexem<TSymbol>, string>($"Unknown lexem at {input.Position} character.");
 }

@@ -2,29 +2,29 @@
 
 namespace LRToolkit.Lexing;
 
-public class Lexer<TToken>
+public class Lexer<TSymbol>
 {
-    private readonly ParsingChain<TToken> _matchingChain;
+    private readonly ParsingChain<TSymbol> _matchingChain;
 
-    public Lexer(ParsingChain<TToken> matchingChain) => _matchingChain = matchingChain;
+    public Lexer(ParsingChain<TSymbol> matchingChain) => _matchingChain = matchingChain;
 
-    public static Lexer<TToken> CreateFrom(params LexemParser<TToken>[] parsers)
+    public static Lexer<TSymbol> CreateFrom(params LexemParser<TSymbol>[] parsers)
     {
         var parsingChain = parsers.BuildChain();
 
         return new(parsingChain);
     }
 
-    public IEnumerable<Option<Lexem<TToken>, string>> GetLexems(TextInput input)
+    public IEnumerable<Option<Lexem<TSymbol>, string>> GetLexems(TextInput input)
     {
-        Option<Lexem<TToken>, string> ToSomeResult(Lexem<TToken> lexem) => lexem.Some<Lexem<TToken>, string>();
-        Option<Lexem<TToken>, string> UnknownError() => LexemValidator<TToken>.GetUnknownError(input);
+        Option<Lexem<TSymbol>, string> ToSomeResult(Lexem<TSymbol> lexem) => lexem.Some<Lexem<TSymbol>, string>();
+        Option<Lexem<TSymbol>, string> UnknownError() => LexemValidator<TSymbol>.GetUnknownError(input);
 
         bool isError = false;
         while (!isError && !input.ReachedEnd())
         {
             var nextLexem = _matchingChain(input).Map(ToSomeResult).ValueOr(UnknownError)
-                .FlatMap(LexemValidator<TToken>.NotEmpty);
+                .FlatMap(LexemValidator<TSymbol>.NotEmpty);
 
             (input, isError) = nextLexem.Map(next => (input.Step(next.GetLength()), false))
                 .ValueOr(_ => (input, true));

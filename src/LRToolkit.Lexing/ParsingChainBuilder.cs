@@ -2,18 +2,18 @@
 
 namespace LRToolkit.Lexing;
 
-public delegate Option<Lexem<TToken>> ParsingChain<TToken>(TextInput input);
+public delegate Option<Lexem<TSymbol>> ParsingChain<TSymbol>(TextInput input);
 
 public static class ParsingChainBuilder
 {
-    public static ParsingChain<TToken> BuildChain<TToken>(this IEnumerable<LexemParser<TToken>> parsers)
+    public static ParsingChain<TSymbol> BuildChain<TSymbol>(this IEnumerable<LexemParser<TSymbol>> parsers)
     {
-        var chain = new ParsingChain<TToken>(_ => Option.None<Lexem<TToken>>());
+        var chain = new ParsingChain<TSymbol>(_ => Option.None<Lexem<TSymbol>>());
 
         return parsers.Reverse().Aggregate(chain, AddParser);
     }
 
-    private static ParsingChain<TToken> AddParser<TToken>(ParsingChain<TToken> chain, LexemParser<TToken> parser) =>
+    private static ParsingChain<TSymbol> AddParser<TSymbol>(ParsingChain<TSymbol> chain, LexemParser<TSymbol> parser) =>
         input =>
         {
             var lexem = parser.Invoke(input);

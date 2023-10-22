@@ -28,8 +28,16 @@ public class State<TSymbol> where TSymbol : notnull
 
     internal MergeableStateDict<TSymbol> MergeableStateDict { get; }
 
-    public static State<TSymbol> CreateStart(State<Symbol<TSymbol>, ParsingState<TSymbol>> dfaState, ItemSet<TSymbol> fullItemSet) =>
-        new State<TSymbol>(dfaState, fullItemSet, new());
+    public static State<TSymbol> CreateStart(
+        State<Symbol<TSymbol>, ParsingState<TSymbol>> dfaState,
+        ItemSet<TSymbol> fullItemSet,
+        ILRParserBuilderBehavior<TSymbol> parserBuilderBehavior)
+    {
+        var mergeableStateDict = new MergeableStateDict<TSymbol>(parserBuilderBehavior);
+        var startState = new State<TSymbol>(dfaState, fullItemSet, mergeableStateDict);
+
+        return startState;
+    }
 
     public State<TSymbol> ToNewFixedState(
         Symbol<TSymbol> symbolAhead,

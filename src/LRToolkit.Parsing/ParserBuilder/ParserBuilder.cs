@@ -9,6 +9,7 @@ namespace LRToolkit.Parsing;
 public class ParserBuilder<TSymbol> where TSymbol : notnull
 {
     private readonly Grammar<TSymbol> _grammar;
+    private readonly ILRParserBuilderBehavior<TSymbol> _parserBuilderBehavior;
     private readonly ILookaheadFactory<TSymbol> _lookaheadFactory;
     private readonly ParserTransitionsObserver<TSymbol> _observer;
 
@@ -16,13 +17,17 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
     private readonly StepCalculator<TSymbol> _stepCalculator;
     private readonly StateForStepBuilder<TSymbol> _stateBuilder;
 
-    private ParserBuilder(Grammar<TSymbol> grammar, ILookaheadFactory<TSymbol> lookaheadFactory, ParserTransitionsObserver<TSymbol> observer)
+    private ParserBuilder(
+        Grammar<TSymbol> grammar,
+        ILRParserBuilderBehavior<TSymbol> parserBuilderBehavior,
+        ParserTransitionsObserver<TSymbol> observer)
     {
         _grammar = grammar;
-        _lookaheadFactory = lookaheadFactory;
+        _parserBuilderBehavior = parserBuilderBehavior;
+        _lookaheadFactory = _parserBuilderBehavior.LookaheadFactory;
         _observer = observer;
 
-        _closureProducer = new ClosureProducer<TSymbol>(grammar, lookaheadFactory);
+        _closureProducer = new ClosureProducer<TSymbol>(grammar, _lookaheadFactory);
         
         _stepCalculator = new StepCalculator<TSymbol>(_closureProducer);
         _stateBuilder = new StateForStepBuilder<TSymbol>(BuildNextStates, _observer);
@@ -30,13 +35,13 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
 
     public static Option<Parser<TSymbol>, BuilderError> Build(
         Grammar<TSymbol> grammar,
-        ILookaheadFactory<TSymbol> lookaheadFactory,
+        ILRParserBuilderBehavior<TSymbol> parserBuilderBehavior,
         Func<ParserTransitionsObserver<TSymbol>, ParserTransitionsObserver<TSymbol>>? configureObserver = null)
     {
         var emptyObserver = ParserTransitionsObserver<TSymbol>.Create();
         var observer = configureObserver?.Invoke(emptyObserver) ?? emptyObserver;
 
-        var builder = new ParserBuilder<TSymbol>(grammar, lookaheadFactory, observer);
+        var builder = new ParserBuilder<TSymbol>(grammar, parserBuilderBehavior, observer);
 
         return builder.Build();
     }
@@ -46,7 +51,7 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
         var automatonBuilder = AutomatonBuilder<Symbol<TSymbol>, ParsingState<TSymbol>>.Create();
         var startItemSet = CreateStartItemSet();
 
-        var startState = State<TSymbol>.CreateStart(automatonBuilder.Start, startItemSet);
+        var startState = State<TSymbol>.CreateStart(automatonBuilder.Start, startItemSet, _parserBuilderBehavior);
         startState.Tag = startItemSet;
 
         var error = BuildNextStates(startState);

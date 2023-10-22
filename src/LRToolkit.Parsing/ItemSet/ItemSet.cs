@@ -35,16 +35,10 @@ public readonly record struct ItemSet<TSymbol>(
     public override int GetHashCode() => Hash.FNV(Kernels);
 
     public override string ToString()
-    {
-        var nl = Environment.NewLine;
-        var dl = $"{nl}    ";
-        
-        var kernels = string.Join(dl, Kernels);
-        var closures = string.Join(dl, Closures);
+    {        
+        var kernels = string.Join(" | ", Kernels);
 
-        return closures.Any()
-            ? $"[{dl}{kernels}{nl}closures:{dl}{closures}{nl}]"
-            : $"[{dl}{kernels}{nl}]";
+        return $"[{kernels}]";
     }
 
     private IEnumerable<Item<TSymbol>> AsEnumerable()

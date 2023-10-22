@@ -1,13 +1,20 @@
-﻿using Optional;
+﻿using LRToolkit.Utilities;
+using Optional;
 using Optional.Collections;
 
 namespace LRToolkit.Parsing;
 
 internal class MergeableStateDict<TSymbol> where TSymbol : notnull
 {
-    private readonly Dictionary<ItemSet<TSymbol>, State<TSymbol>> _stateByItemSet = new();
+    private readonly IDictionary<ItemSet<TSymbol>, State<TSymbol>> _mergeableStates;
 
-    public Option<State<TSymbol>> GetMergeableOrNone(ItemSet<TSymbol> itemSet) => _stateByItemSet.GetValueOrNone(itemSet);
+    public MergeableStateDict(ILRParserBuilderBehavior<TSymbol> builderBehavior)
+    {
+        var mergeableItemSetsComparer = new FuncEqualityComparer<ItemSet<TSymbol>>(builderBehavior.IsMergeable);
+        _mergeableStates = new Dictionary<ItemSet<TSymbol>, State<TSymbol>>(mergeableItemSetsComparer);
+    }
 
-    public void AddNew(State<TSymbol> state, ItemSet<TSymbol> itemSet) => _stateByItemSet.Add(itemSet, state);
+    public Option<State<TSymbol>> GetMergeableOrNone(ItemSet<TSymbol> itemSet) => _mergeableStates.GetValueOrNone(itemSet);
+
+    public void AddNew(State<TSymbol> state, ItemSet<TSymbol> itemSet) => _mergeableStates.Add(itemSet, state);
 }

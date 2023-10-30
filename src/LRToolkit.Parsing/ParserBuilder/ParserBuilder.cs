@@ -24,13 +24,13 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
     {
         _grammar = grammar;
         _parserBuilderBehavior = parserBuilderBehavior;
-        _lookaheadFactory = _parserBuilderBehavior.LookaheadFactory;
+        _lookaheadFactory = _parserBuilderBehavior.GetLookaheadFactory();
         _observer = observer;
 
         _closureProducer = new ClosureProducer<TSymbol>(grammar, _lookaheadFactory);
         
         _stepCalculator = new StepCalculator<TSymbol>(_closureProducer);
-        _stateBuilder = new StateForStepBuilder<TSymbol>(BuildNextStates, _observer);
+        _stateBuilder = new StateForStepBuilder<TSymbol>(BuildNextStates, _parserBuilderBehavior, _observer);
     }
 
     public static Option<Parser<TSymbol>, BuilderError> Build(
@@ -52,8 +52,6 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
         var startItemSet = CreateStartItemSet();
 
         var startState = State<TSymbol>.CreateStart(automatonBuilder.Start, startItemSet, _parserBuilderBehavior);
-        startState.Tag = startItemSet;
-
         var error = BuildNextStates(startState);
 
         return error.Match(

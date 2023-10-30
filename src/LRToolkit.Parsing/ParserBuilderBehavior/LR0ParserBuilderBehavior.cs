@@ -4,7 +4,7 @@ namespace LRToolkit.Parsing;
 
 public class LR0ParserBuilderBehavior<TSymbol> : ILRParserBuilderBehavior<TSymbol> where TSymbol : notnull
 {
-    public ILookaheadFactory<TSymbol> LookaheadFactory { get; } = new NoLookaheadFactory<TSymbol>();
+    public ILookaheadFactory<TSymbol> GetLookaheadFactory() => new NoLookaheadFactory<TSymbol>();
 
     public bool IsMergeable(ItemSet<TSymbol> first, ItemSet<TSymbol> second) => first == second;
 

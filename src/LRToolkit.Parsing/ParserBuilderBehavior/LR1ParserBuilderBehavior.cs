@@ -5,12 +5,12 @@ namespace LRToolkit.Parsing;
 
 public class LR1ParserBuilderBehavior<TSymbol> : ILRParserBuilderBehavior<TSymbol> where TSymbol : notnull
 {
-    public LR1ParserBuilderBehavior(Grammar<TSymbol> grammar)
-    {
-        LookaheadFactory = new OneLookaheadFactory<TSymbol>(grammar);
-    }
+    private readonly ILookaheadFactory<TSymbol> _lookaheadFactory;
 
-    public ILookaheadFactory<TSymbol> LookaheadFactory { get; }
+    public LR1ParserBuilderBehavior(Grammar<TSymbol> grammar) =>
+        _lookaheadFactory = new OneLookaheadFactory<TSymbol>(grammar);
+
+    public ILookaheadFactory<TSymbol> GetLookaheadFactory() => _lookaheadFactory;
 
     public bool IsMergeable(ItemSet<TSymbol> first, ItemSet<TSymbol> second) => first == second;
 

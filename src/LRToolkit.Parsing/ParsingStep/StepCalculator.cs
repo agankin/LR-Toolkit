@@ -46,7 +46,7 @@ internal class StepCalculator<TSymbol> where TSymbol : notnull
     private ItemSet<TSymbol> GetStepForwardItemSet(ItemSet<TSymbol> itemSet, Symbol<TSymbol> symbolAhead)
     {
         var kernels = itemSet.StepForward(symbolAhead);
-        var closures = _closureProducer.ProduceClosures(kernels);
+        var closures = _closureProducer.Produce(kernels);
         
         var next = new ItemSet<TSymbol>(kernels, closures);
 

@@ -2,31 +2,30 @@
 
 namespace LRToolkit.Parsing;
 
-public class State<TSymbol> where TSymbol : notnull
+internal record State<TSymbol> where TSymbol : notnull
 {
-    private State(
-        State<Symbol<TSymbol>, ParsingState<TSymbol>> dfaState,
-        ItemSet<TSymbol> fullItemSet,
-        MergeableStateDict<TSymbol> mergeableStateDict)
+    private readonly State<Symbol<TSymbol>, ParsingState<TSymbol>> _dfaState;
+    private ItemSet<TSymbol> _fullItemSet;
+
+    public required State<Symbol<TSymbol>, ParsingState<TSymbol>> DFAState
     {
-        DFAState = dfaState;
-        FullItemSet = fullItemSet;
-        MergeableStateDict = mergeableStateDict;
+        get => _dfaState;
+        init
+        {
+            _dfaState = value;
+            _dfaState.Tag = FullItemSet;
+        }
     }
 
-    public State<Symbol<TSymbol>, ParsingState<TSymbol>> DFAState { get; }
+    public required ItemSet<TSymbol> FullItemSet
+    {
+        get => _fullItemSet;
+        set => _dfaState.Tag = _fullItemSet = value;
+    }
 
-    public ItemSet<TSymbol> FullItemSet { get; }
+    internal required MergeableStateDict<TSymbol> MergeableStateDict { get; init; }
 
     public long Id => DFAState.Id;
-
-    public object? Tag
-    {
-        get => DFAState.Tag;
-        set => DFAState.Tag = value;
-    }
-
-    internal MergeableStateDict<TSymbol> MergeableStateDict { get; }
 
     public static State<TSymbol> CreateStart(
         State<Symbol<TSymbol>, ParsingState<TSymbol>> dfaState,
@@ -34,7 +33,12 @@ public class State<TSymbol> where TSymbol : notnull
         ILRParserBuilderBehavior<TSymbol> parserBuilderBehavior)
     {
         var mergeableStateDict = new MergeableStateDict<TSymbol>(parserBuilderBehavior);
-        var startState = new State<TSymbol>(dfaState, fullItemSet, mergeableStateDict);
+        var startState = new State<TSymbol>
+        {
+            DFAState = dfaState,
+            FullItemSet = fullItemSet,
+            MergeableStateDict = mergeableStateDict
+        };
 
         return startState;
     }
@@ -45,16 +49,18 @@ public class State<TSymbol> where TSymbol : notnull
         ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> reduce)
     {
         var newDFAState = DFAState.ToNewFixedState(symbolAhead, reduce);
-        return new State<TSymbol>(newDFAState, fullItemSet, MergeableStateDict);
+        return this with
+        {
+            DFAState = newDFAState,
+            FullItemSet = fullItemSet
+        };
     }
 
     public void LinkFixedState(Symbol<TSymbol> symbolAhead, State<TSymbol> toState, ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> reduce) =>
         DFAState.LinkFixedState(symbolAhead, toState.DFAState, reduce);
 
-    public void LinkDynamicState(Symbol<TSymbol> symbol, Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> reduce)
-    {
+    public void LinkDynamicState(Symbol<TSymbol> symbol, Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> reduce) =>
         DFAState.LinkDynamic(symbol, reduce);
-    }
 
     public AcceptedState<Symbol<TSymbol>, ParsingState<TSymbol>> ToNewFixedAccepted(
         Symbol<TSymbol> symbol,

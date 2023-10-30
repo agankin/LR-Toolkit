@@ -9,11 +9,16 @@ internal delegate Option<BuilderError> BuildNext<TSymbol>(State<TSymbol> fromSta
 internal class StateForStepBuilder<TSymbol> where TSymbol : notnull
 {
     private readonly BuildNext<TSymbol> _buildNext;
+    private readonly ILRParserBuilderBehavior<TSymbol> _parserBuilderBehavior;
     private readonly StateReducerFactory<TSymbol> _reducerFactory;
 
-    public StateForStepBuilder(BuildNext<TSymbol> buildNext, ParserTransitionsObserver<TSymbol> observer)
+    public StateForStepBuilder(
+        BuildNext<TSymbol> buildNext,
+        ILRParserBuilderBehavior<TSymbol> parserBuilderBehavior,
+        ParserTransitionsObserver<TSymbol> observer)
     {
         _buildNext = buildNext;
+        _parserBuilderBehavior = parserBuilderBehavior;
         _reducerFactory = new(observer);
     }
 
@@ -38,14 +43,15 @@ internal class StateForStepBuilder<TSymbol> where TSymbol : notnull
             toState => 
             {
                 state.LinkFixedState(symbol, toState, reduce);
+                var errorOrNone = _parserBuilderBehavior.Merge(toState.FullItemSet, nextItemSet)
+                    .Map(mergedItemSet => toState.FullItemSet = mergedItemSet)
+                    .Match(_ => Option.None<BuilderError>(), error => error.Some());
                 
-                return Option.None<BuilderError>();
+                return errorOrNone;
             },
             () =>
             {
                 var nextState = state.ToNewFixedState(symbol, nextItemSet, reduce);
-                nextState.Tag = nextItemSet;
-
                 state.MergeableStateDict.AddNew(nextState, nextItemSet);
                 
                 return _buildNext(nextState);

@@ -9,7 +9,7 @@ public record ParsingState<TSymbol>(
 )
 where TSymbol : notnull
 {
-    public static ParsingState<TSymbol> CreateNew(State<TSymbol> start)
+    internal static ParsingState<TSymbol> CreateNew(State<TSymbol> start)
     {
         var parsingStack = new ParsingStack<TSymbol>();
         var priorStates = ImmutableStack<IState<Symbol<TSymbol>, ParsingState<TSymbol>>>.Empty.Push(start.DFAState);

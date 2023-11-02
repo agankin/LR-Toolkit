@@ -10,8 +10,8 @@ internal class MergeableStateDict<TSymbol> where TSymbol : notnull
 
     public MergeableStateDict(ILRParserBuilderBehavior<TSymbol> builderBehavior)
     {
-        var mergeableItemSetsComparer = new FuncEqualityComparer<ItemSet<TSymbol>>(builderBehavior.IsMergeable);
-        _mergeableStates = new Dictionary<ItemSet<TSymbol>, State<TSymbol>>(mergeableItemSetsComparer);
+        var comparer = new FuncEqualityComparer<ItemSet<TSymbol>>(builderBehavior.IsMergeable);
+        _mergeableStates = new Dictionary<ItemSet<TSymbol>, State<TSymbol>>(comparer);
     }
 
     public Option<State<TSymbol>> GetMergeableOrNone(ItemSet<TSymbol> itemSet) => _mergeableStates.GetValueOrNone(itemSet);

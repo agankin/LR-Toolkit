@@ -8,12 +8,12 @@ using Playground;
 var lexer = LispLexer.Create();
 
 var grammar = LispGrammar.Create();
-var lookaheadFactory = new OneLookaheadFactory<LispToken>(grammar);
-var parserOrError = ParserBuilder<LispToken>.Build(grammar, lookaheadFactory, ParserObserver.Configure);
+var lr1Behavior = new LR1ParserBuilderBehavior<LispSymbol>(grammar);
+var parserOrError = ParserBuilder<LispSymbol>.Build(grammar, lr1Behavior, ParserObserver.Configure);
 
 parserOrError.Map(parser =>
 {
-    var formattedGraph = StatesGraphFormatter<Symbol<LispToken>, ParsingState<LispToken>>.Format(parser.StartState);
+    var formattedGraph = StatesGraphFormatter<Symbol<LispSymbol>, ParsingState<LispSymbol>>.Format(parser.StartState);
     Console.WriteLine(formattedGraph);
 
     Console.Write("Expr> ");
@@ -21,7 +21,7 @@ parserOrError.Map(parser =>
     var textInput = new TextInput(text);
 
     var lexems = lexer.GetLexems(textInput).Select(lexemOption => lexemOption.ValueOrFailure())
-        .Where(lexem => lexem.Token != LispToken.WHITESPACE);
+        .Where(lexem => lexem.Symbol != LispSymbol.WHITESPACE);
     foreach (var lexem in lexems)
         Console.WriteLine(lexem);
 

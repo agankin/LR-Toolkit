@@ -22,7 +22,7 @@ public class Production<TSymbol> : IReadOnlyCollection<TSymbol>, IEquatable<Prod
 
     public int Count => _productionSymbols.Count;
 
-    public bool Equals(Production<TSymbol>? other) => other != null && other.SequenceEqual(this);
+    public bool Equals(Production<TSymbol>? other) => other != null && this.SequenceEqual(other);
 
     public IEnumerator<TSymbol> GetEnumerator() => _productionSymbols.GetEnumerator();
 

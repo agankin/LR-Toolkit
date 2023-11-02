@@ -3,13 +3,13 @@ using LRToolkit.GrammarDefinition;
 namespace Playground;
 
 using static GrammarUtils;
-using static LispToken;
+using static LispSymbol;
 
 public static class LispGrammar
 {
-    public static Grammar<LispToken> Create()
+    public static Grammar<LispSymbol> Create()
     {
-        var grammarBuilder = new GrammarBuilder<LispToken>(START)
+        var grammarBuilder = new GrammarBuilder<LispSymbol>(START)
         {
             [START] = _( ELEMENT ),
 

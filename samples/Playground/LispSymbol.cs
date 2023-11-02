@@ -1,6 +1,6 @@
 namespace Playground;
 
-public enum LispToken
+public enum LispSymbol
 {
     START = 1,
 

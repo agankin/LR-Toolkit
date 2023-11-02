@@ -3,13 +3,13 @@ using LRToolkit.Lexing;
 namespace Playground;
 
 using static RegexParser;
-using static LispToken;
+using static LispSymbol;
 
 public static class LispLexer
 {
-    public static Lexer<LispToken> Create()
+    public static Lexer<LispSymbol> Create()
     {
-        var lexer = Lexer<LispToken>.CreateFrom(
+        var lexer = Lexer<LispSymbol>.CreateFrom(
             Regex(@"\G\(").Is(OPEN),
             Regex(@"\G\)").Is(CLOSE),
 

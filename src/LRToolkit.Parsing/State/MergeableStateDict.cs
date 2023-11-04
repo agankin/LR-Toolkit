@@ -8,9 +8,9 @@ internal class MergeableStateDict<TSymbol> where TSymbol : notnull
 {
     private readonly IDictionary<ItemSet<TSymbol>, State<TSymbol>> _mergeableStates;
 
-    public MergeableStateDict(ILRParserBuilderBehavior<TSymbol> builderBehavior)
+    public MergeableStateDict(IItemSetMerger<TSymbol> itemSetMerger)
     {
-        var comparer = new FuncEqualityComparer<ItemSet<TSymbol>>(builderBehavior.IsMergeable);
+        var comparer = new FuncEqualityComparer<ItemSet<TSymbol>>(itemSetMerger.IsMergeable);
         _mergeableStates = new Dictionary<ItemSet<TSymbol>, State<TSymbol>>(comparer);
     }
 

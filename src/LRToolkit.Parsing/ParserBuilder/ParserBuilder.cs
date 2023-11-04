@@ -9,8 +9,8 @@ namespace LRToolkit.Parsing;
 public class ParserBuilder<TSymbol> where TSymbol : notnull
 {
     private readonly Grammar<TSymbol> _grammar;
-    private readonly ILRParserBuilderBehavior<TSymbol> _parserBuilderBehavior;
     private readonly ILookaheadFactory<TSymbol> _lookaheadFactory;
+    private readonly IItemSetMerger<TSymbol> _itemSetMerger;
     private readonly ParserTransitionsObserver<TSymbol> _observer;
 
     private readonly ClosureProducer<TSymbol> _closureProducer;
@@ -23,14 +23,14 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
         ParserTransitionsObserver<TSymbol> observer)
     {
         _grammar = grammar;
-        _parserBuilderBehavior = parserBuilderBehavior;
-        _lookaheadFactory = _parserBuilderBehavior.GetLookaheadFactory();
+        _lookaheadFactory = parserBuilderBehavior.GetLookaheadFactory();
+        _itemSetMerger = parserBuilderBehavior.GetItemSetMerger();
         _observer = observer;
 
         _closureProducer = new ClosureProducer<TSymbol>(grammar, _lookaheadFactory);
         
         _stepCalculator = new StepCalculator<TSymbol>(_closureProducer);
-        _stateBuilder = new StateForStepBuilder<TSymbol>(BuildNextStates, _parserBuilderBehavior, _observer);
+        _stateBuilder = new StateForStepBuilder<TSymbol>(BuildNextStates, _itemSetMerger, _observer);
     }
 
     public static Option<Parser<TSymbol>, BuilderError> Build(
@@ -51,7 +51,7 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
         var automatonBuilder = AutomatonBuilder<Symbol<TSymbol>, ParsingState<TSymbol>>.Create();
         var startItemSet = CreateStartItemSet();
 
-        var startState = State<TSymbol>.CreateStart(automatonBuilder.Start, startItemSet, _parserBuilderBehavior);
+        var startState = State<TSymbol>.CreateStart(automatonBuilder.Start, startItemSet, _itemSetMerger);
         var error = BuildNextStates(startState);
 
         return error.Match(

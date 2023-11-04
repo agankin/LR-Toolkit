@@ -30,9 +30,9 @@ internal record State<TSymbol> where TSymbol : notnull
     public static State<TSymbol> CreateStart(
         State<Symbol<TSymbol>, ParsingState<TSymbol>> dfaState,
         ItemSet<TSymbol> fullItemSet,
-        ILRParserBuilderBehavior<TSymbol> parserBuilderBehavior)
+        IItemSetMerger<TSymbol> itemSetMerger)
     {
-        var mergeableStateDict = new MergeableStateDict<TSymbol>(parserBuilderBehavior);
+        var mergeableStateDict = new MergeableStateDict<TSymbol>(itemSetMerger);
         var startState = new State<TSymbol>
         {
             DFAState = dfaState,

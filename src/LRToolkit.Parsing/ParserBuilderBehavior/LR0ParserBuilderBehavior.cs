@@ -1,13 +1,17 @@
-using Optional;
-
 namespace LRToolkit.Parsing;
 
 public class LR0ParserBuilderBehavior<TSymbol> : ILRParserBuilderBehavior<TSymbol> where TSymbol : notnull
 {
-    public ILookaheadFactory<TSymbol> GetLookaheadFactory() => new NoLookaheadFactory<TSymbol>();
+    private readonly ILookaheadFactory<TSymbol> _lookaheadFactory;
+    private readonly IItemSetMerger<TSymbol> _itemSetMerger;
 
-    public bool IsMergeable(ItemSet<TSymbol> first, ItemSet<TSymbol> second) => first == second;
+    public LR0ParserBuilderBehavior()
+    {
+        _lookaheadFactory = new NoLookaheadFactory<TSymbol>();
+        _itemSetMerger = new LR0ItemSetMerger<TSymbol>();
+    }
 
-    public Option<ItemSet<TSymbol>, BuilderError> Merge(ItemSet<TSymbol> first, ItemSet<TSymbol> second) =>
-        first.Some<ItemSet<TSymbol>, BuilderError>();
+    public ILookaheadFactory<TSymbol> GetLookaheadFactory() => _lookaheadFactory;
+
+    public IItemSetMerger<TSymbol> GetItemSetMerger() => _itemSetMerger;
 }

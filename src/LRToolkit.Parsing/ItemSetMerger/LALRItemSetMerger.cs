@@ -15,13 +15,15 @@ public class LALRItemSetMerger<TSymbol> : IItemSetMerger<TSymbol> where TSymbol 
 
     public bool IsMergeable(ItemSet<TSymbol> first, ItemSet<TSymbol> second)
     {
-        var comparer = new FuncEqualityComparer<Item<TSymbol>>(IsMergeable);
+        var comparer = new FuncEqualityComparer<Item<TSymbol>>(IsMergeable, GetMergeableHashCode);
         
         var firstSet = new HashSet<Item<TSymbol>>(first.Kernels, comparer);
         var secondSet = new HashSet<Item<TSymbol>>(second.Kernels, comparer);
         
         return firstSet.SetEquals(secondSet);
     }
+
+    public int GetMergeableHashCode(ItemSet<TSymbol> itemSet) => Hash.FNV(itemSet, GetMergeableHashCode);
 
     public Option<ItemSet<TSymbol>, BuilderError> Merge(ItemSet<TSymbol> first, ItemSet<TSymbol> second)
     {
@@ -35,4 +37,10 @@ public class LALRItemSetMerger<TSymbol> : IItemSetMerger<TSymbol> where TSymbol 
         first.Position == second.Position
             && first.ForSymbol.Equals(second.ForSymbol)
             && first.Production.Equals(second.Production);
+
+    private static int GetMergeableHashCode(Item<TSymbol> item)
+    {
+        var hashComponents = new[] { item.Position, item.ForSymbol.GetHashCode(), item.Production.GetHashCode() };
+        return Hash.FNV(hashComponents, getHashCode: hashCode => hashCode);
+    }
 }

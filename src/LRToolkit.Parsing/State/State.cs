@@ -4,7 +4,7 @@ namespace LRToolkit.Parsing;
 
 internal record State<TSymbol> where TSymbol : notnull
 {
-    private readonly State<Symbol<TSymbol>, ParsingState<TSymbol>> _dfaState;
+    private readonly State<Symbol<TSymbol>, ParsingState<TSymbol>> _dfaState = null!;
     private ItemSet<TSymbol> _fullItemSet;
 
     public required State<Symbol<TSymbol>, ParsingState<TSymbol>> DFAState

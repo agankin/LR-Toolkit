@@ -10,7 +10,7 @@ internal class MergeableStateDict<TSymbol> where TSymbol : notnull
 
     public MergeableStateDict(IItemSetMerger<TSymbol> itemSetMerger)
     {
-        var comparer = new FuncEqualityComparer<ItemSet<TSymbol>>(itemSetMerger.IsMergeable);
+        var comparer = new FuncEqualityComparer<ItemSet<TSymbol>>(itemSetMerger.IsMergeable, itemSetMerger.GetMergeableHashCode);
         _mergeableStates = new Dictionary<ItemSet<TSymbol>, State<TSymbol>>(comparer);
     }
 

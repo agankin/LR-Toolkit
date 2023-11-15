@@ -1,4 +1,4 @@
-﻿namespace LRToolkit.GrammarDefinition;
+﻿namespace LRToolkit.Grammaring;
 
 public static class GrammarUtils
 {

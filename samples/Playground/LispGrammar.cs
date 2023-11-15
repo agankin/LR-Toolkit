@@ -1,4 +1,4 @@
-using LRToolkit.GrammarDefinition;
+using LRToolkit.Grammaring;
 
 namespace Playground;
 

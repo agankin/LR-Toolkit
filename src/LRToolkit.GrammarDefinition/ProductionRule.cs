@@ -1,4 +1,4 @@
-﻿namespace LRToolkit.GrammarDefinition;
+﻿namespace LRToolkit.Grammaring;
 
 public class ProductionRule<TSymbol>
 {

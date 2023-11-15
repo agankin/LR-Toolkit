@@ -1,4 +1,4 @@
-using LRToolkit.GrammarDefinition;
+using LRToolkit.Grammaring;
 using LRToolkit.Utilities;
 using Optional;
 

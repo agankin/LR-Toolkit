@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace LRToolkit.GrammarDefinition;
+namespace LRToolkit.Grammaring;
 
 public class ProductionRuleCollection<TSymbol> : IReadOnlyList<ProductionRule<TSymbol>>
 {

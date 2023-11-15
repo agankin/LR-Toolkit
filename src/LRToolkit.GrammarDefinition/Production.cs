@@ -2,7 +2,7 @@
 using LRToolkit.Utilities;
 using Optional;
 
-namespace LRToolkit.GrammarDefinition;
+namespace LRToolkit.Grammaring;
 
 public class Production<TSymbol> : IReadOnlyCollection<TSymbol>, IEquatable<Production<TSymbol>>
 {

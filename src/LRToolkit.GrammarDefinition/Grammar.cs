@@ -1,6 +1,6 @@
 ﻿using Optional.Collections;
 
-namespace LRToolkit.GrammarDefinition;
+namespace LRToolkit.Grammaring;
 
 public class Grammar<TSymbol>
 {

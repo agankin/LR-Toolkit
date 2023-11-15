@@ -1,4 +1,4 @@
-﻿using LRToolkit.GrammarDefinition;
+﻿using LRToolkit.Grammaring;
 using DFAutomaton;
 using Optional;
 using Optional.Unsafe;

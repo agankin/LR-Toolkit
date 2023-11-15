@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.Lexing", "src\LRT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.Utilities", "src\LRToolkit.Utilities\LRToolkit.Utilities.csproj", "{9C4535CA-7B92-4221-9065-4E9FC6E68308}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.GrammarDefinition", "src\LRToolkit.GrammarDefinition\LRToolkit.GrammarDefinition.csproj", "{D7A3A5D0-3F68-4648-92C9-761969D1590B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.Grammaring", "src\LRToolkit.Grammaring\LRToolkit.Grammaring.csproj", "{D7A3A5D0-3F68-4648-92C9-761969D1590B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LRToolkit.Parsing", "src\LRToolkit.Parsing\LRToolkit.Parsing.csproj", "{B949E1DB-CC36-4AF3-A0D6-D5DD816661F1}"
 EndProject

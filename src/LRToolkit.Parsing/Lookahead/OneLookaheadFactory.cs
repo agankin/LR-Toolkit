@@ -12,7 +12,7 @@ public class OneLookaheadFactory<TSymbol> : ILookaheadFactory<TSymbol> where TSy
 
     public OneLookaheadFactory(Grammar<TSymbol> grammar) => _grammar = grammar;
 
-    public ILookahead<TSymbol> GetStart() => new OneLookahead<TSymbol>(Symbol<TSymbol>.End());
+    public ILookahead<TSymbol> GetForStart() => new OneLookahead<TSymbol>(Symbol<TSymbol>.End());
 
     public Option<ILookahead<TSymbol>> GetAhead(Item<TSymbol> item) =>
         item.GetSymbolAhead(LookaheadIdx).Map<ILookahead<TSymbol>>(symbol => new OneLookahead<TSymbol>(symbol));

@@ -17,13 +17,19 @@ public class Parser<TSymbol> where TSymbol : notnull
 
     public IState<Symbol<TSymbol>, ParsingState<TSymbol>> StartState => _automaton.Start;
 
-    public Option<ParsingState<TSymbol>, AutomatonError<Symbol<TSymbol>, ParsingState<TSymbol>>> Run(IEnumerable<Lexem<TSymbol>> lexems)
+    public Option<Symbol<TSymbol>, AutomatonError<Symbol<TSymbol>, ParsingState<TSymbol>>> Run(IEnumerable<Lexem<TSymbol>> lexems)
     {
+        var endLexem = Symbol<TSymbol>.End();
         var startValue = ParsingState<TSymbol>.CreateNew(_startState);
         var symbolsWithEnd = lexems
             .Select(Symbol<TSymbol>.Create)
-            .Append(Symbol<TSymbol>.End());
+            .Append(endLexem);
 
-        return _automaton.Run(startValue, symbolsWithEnd);
+        var result = _automaton.Run(startValue, symbolsWithEnd);
+        var startNode = result.Map(GetRootNode);
+
+        return startNode;
     }
+
+    private Symbol<TSymbol> GetRootNode(ParsingState<TSymbol> state) => state.ParsingStack.Peek();
 }

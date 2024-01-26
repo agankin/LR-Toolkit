@@ -39,33 +39,34 @@ internal class StateReducerFactory<TSymbol> where TSymbol : notnull
         {
             var (parsingState, _, emitNext) = automatonState;
 
-            var reducedToSymbol = reducedItem.ForSymbol;
+            var lookaheadCount = reducedItem.Lookahead.Count;
             var (parsingStack, priorStates) = parsingState;
 
-            var (nextParsingStack, node) = symbol.Type switch
-            {
-                SymbolType.Symbol => parsingStack
-                    .Shift(symbol)
-                    .Reduce(reducedItem), 
-                _ => parsingStack.Reduce(reducedItem)
-            };
+            Symbol<TSymbol> reducedToSymbol = null!;
+            IReadOnlyCollection<Symbol<TSymbol>> poppedLookaheads = null!;
+            var resultParsingStack = parsingStack
+                .Pipe(stack => lookaheadCount == 0 ? stack.Shift(symbol) : stack)
+                .Pipe(stack => stack.Reduce(reducedItem, out reducedToSymbol, out poppedLookaheads));
             
-            var nextPriorStates = priorStates.PopSkip(reducedItem.Count - 1);
-            var goToState = nextPriorStates.Peek();
+            var resultPriorStates = priorStates
+                .PopSkip(reducedItem.Count - 1)
+                .Peek(out var goToState);
 
             _observer.ReduceListener(parsingState, symbol, reducedItem, goToState.Id);
 
-            var nextParsingState = parsingState with
+            var resultParsingState = parsingState with
             {
-                ParsingStack = nextParsingStack,
-                PriorStates = nextPriorStates
+                ParsingStack = resultParsingStack,
+                PriorStates = resultPriorStates
             };
 
-            emitNext(Symbol<TSymbol>.Create(reducedToSymbol));
-            foreach (var symbol in reducedItem.Lookahead)
+            emitNext(reducedToSymbol);
+            poppedLookaheads.ForEach(emitNext);
+
+            if (lookaheadCount > 0)
                 emitNext(symbol);
 
-            return new(nextParsingState, goToState.Some());
+            return new(resultParsingState, goToState.Some());
         };
     }
 

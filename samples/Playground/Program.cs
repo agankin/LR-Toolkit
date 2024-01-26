@@ -26,8 +26,12 @@ parserOrError.Map(parser =>
         Console.WriteLine(lexem);
 
     Console.WriteLine("Run Parser:");
-    parser.Run(lexems)
-        .MatchNone(error =>
+    parser.Run(lexems).Match(
+        startSymbol =>
+        {
+            
+        },
+        error =>
         {
             Console.WriteLine($"ERROR: {error.Type}");
             Console.WriteLine($"    FROM STATE: {error.State}");

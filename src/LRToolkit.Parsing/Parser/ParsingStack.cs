@@ -4,33 +4,36 @@ using LRToolkit.Utilities;
 
 namespace LRToolkit.Parsing;
 
-public readonly record struct ParsingStack<TSymbol> : IEnumerable<ParsingTreeNode<TSymbol>> where TSymbol : notnull
+public readonly record struct ParsingStack<TSymbol> : IEnumerable<Symbol<TSymbol>> where TSymbol : notnull
 {
-    private ImmutableStack<ParsingTreeNode<TSymbol>> _nodesStack { get; init; } = ImmutableStack<ParsingTreeNode<TSymbol>>.Empty;
+    private ImmutableStack<Symbol<TSymbol>> _nodesStack { get; init; } = ImmutableStack<Symbol<TSymbol>>.Empty;
 
-    public ParsingStack()
-    {
-    }
+    public ParsingStack() { }
 
-    public ParsingStack<TSymbol> Shift(Symbol<TSymbol> symbol)
-    {
-        var node = ParsingTreeNode<TSymbol>.ForShift(symbol);
+    public ParsingStack<TSymbol> Shift(Symbol<TSymbol> symbol) => this with { _nodesStack = _nodesStack.Push(symbol) };
 
-        return this with { _nodesStack = _nodesStack.Push(node) };
-    }
-
-    public (ParsingStack<TSymbol>, ParsingTreeNode<TSymbol>) Reduce(Item<TSymbol> reducedItem)
-    {
-        var symbol = Symbol<TSymbol>.Create(reducedItem.ForSymbol);
+    public ParsingStack<TSymbol> Reduce(
+        Item<TSymbol> reducedItem,
+        out Symbol<TSymbol> reducedToSymbol,
+        out IReadOnlyCollection<Symbol<TSymbol>> poppedLookaheads)
+    {        
         var reductionCount = reducedItem.ProductionCount;
+        var lookaheadCount = reducedItem.Lookahead.Count - 1;
+        
+        var @this = this;
+        var result = _nodesStack
+            .Pop(lookaheadCount, out poppedLookaheads)
+            .Pop(reductionCount, out var symbolsToReduce)
+            .Pipe(stack => @this with { _nodesStack = stack });
 
-        var (nodesStack, nodes) = _nodesStack.Pop(reductionCount);
-        var node = ParsingTreeNode<TSymbol>.ForReduce(symbol, nodes);
+        reducedToSymbol = Symbol<TSymbol>.CreateReduced(reducedItem.ForSymbol, symbolsToReduce);
 
-        return (this with { _nodesStack = nodesStack }, node);
+        return result;
     }
 
-    public IEnumerator<ParsingTreeNode<TSymbol>> GetEnumerator() => _nodesStack.AsEnumerable().GetEnumerator();
+    public Symbol<TSymbol> Peek() => _nodesStack.Peek();
+
+    public IEnumerator<Symbol<TSymbol>> GetEnumerator() => _nodesStack.AsEnumerable().GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

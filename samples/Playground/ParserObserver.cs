@@ -10,22 +10,22 @@ public static class ParserObserver
         {
             var (parsingStack, _) = parsingState;
 
-            Console.WriteLine($"[{Format(parsingStack)}] + {symbolAhead} --- SHIFT ---> State {transitingToId}");
+            Console.WriteLine($"[{parsingStack.Format()}] + {symbolAhead} --- SHIFT ---> State {transitingToId}");
         })
         .OnReduce((parsingState, symbolAhead, rule, transitingToId) =>
         {
             var (parsingStack, _) = parsingState;
             var reducedToSymbol = rule.ForSymbol;
 
-            Console.WriteLine($"[{Format(parsingStack)}] + {symbolAhead} --- REDUCE {rule} ---> State {transitingToId}");
+            Console.WriteLine($"[{parsingStack.Format()}] + {symbolAhead} --- REDUCE {rule} ---> State {transitingToId}");
         })
         .OnAccept((parsingState, transitingToId) =>
         {
             var (parsingStack, _) = parsingState;
             
-            Console.WriteLine($"[{Format(parsingStack)}] --- ACCEPT ---> State {transitingToId}");
+            Console.WriteLine($"[{parsingStack.Format()}] --- ACCEPT ---> State {transitingToId}");
         });
 
-    private static string Format<TSymbol>(IEnumerable<ParsingTreeNode<TSymbol>> node) where TSymbol : notnull =>
-        string.Join(", ", node.Select(symbol => symbol.Symbol));
+    private static string Format<TSymbol>(this IEnumerable<Symbol<TSymbol>> symbols) where TSymbol : notnull =>
+        string.Join(", ", symbols);
 }

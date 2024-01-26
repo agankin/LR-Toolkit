@@ -86,7 +86,7 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
     private ItemSet<TSymbol> CreateStartItemSet()
     {
         var start = _grammar.Start;
-        var startLookahead = _lookaheadFactory.GetStart();
+        var startLookahead = _lookaheadFactory.GetForStart();
 
         var kernel = Item<TSymbol>.ForStart(start, startLookahead);
         var kernels = new HashSet<Item<TSymbol>> { kernel };

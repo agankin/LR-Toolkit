@@ -4,7 +4,7 @@ namespace LRToolkit.Parsing;
 
 public interface ILookaheadFactory<TSymbol> where TSymbol : notnull
 {
-    ILookahead<TSymbol> GetStart();
+    ILookahead<TSymbol> GetForStart();
     
     Option<ILookahead<TSymbol>> GetAhead(Item<TSymbol> item);
 

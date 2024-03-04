@@ -11,16 +11,16 @@ internal class StateReducerFactory<TSymbol> where TSymbol : notnull
 
     public StateReducerFactory(ParserTransitionsObserver<TSymbol> observer) => _observer = observer;
 
-    public ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> Shift(Symbol<TSymbol> symbol)
+    public Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> Shift()
     {
-        return automatonState =>
+        return (parsingState, symbol) =>
         {
-            var (parsingState, nextStateOption, _) = automatonState;
+            var nextStateOption = Automaton<Symbol<TSymbol>, ParsingState<TSymbol>>.CurrentTransition.Value.TransitsTo;
             var nextState = nextStateOption.ValueOrFailure();
 
             _observer.ShiftListener(parsingState, symbol, nextState.Id);
             
-            var (parsingStack, priorStates) = parsingState;
+            var (parsingStack, priorStateIds) = parsingState;
             return parsingState with
             {
                 ParsingStack = symbol.Type switch
@@ -28,19 +28,17 @@ internal class StateReducerFactory<TSymbol> where TSymbol : notnull
                     SymbolType.Symbol => parsingStack.Shift(symbol),
                     _ => parsingStack
                 },
-                PriorStates = priorStates.Push(nextState),
+                PriorStateIds = priorStateIds.Push(nextState.Id),
             };
         };
     }
 
-    public Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> Reduce(Symbol<TSymbol> symbol, Item<TSymbol> reducedItem)
+    public Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> Reduce(Item<TSymbol> reducedItem)
     {
-        return automatonState =>
+        return (parsingState, symbol) =>
         {
-            var (parsingState, _, emitNext) = automatonState;
-
             var lookaheadCount = reducedItem.Lookahead.Count;
-            var (parsingStack, priorStates) = parsingState;
+            var (parsingStack, priorStateIds) = parsingState;
 
             Symbol<TSymbol> reducedToSymbol = null!;
             IReadOnlyCollection<Symbol<TSymbol>> poppedLookaheads = null!;
@@ -48,33 +46,36 @@ internal class StateReducerFactory<TSymbol> where TSymbol : notnull
                 .Pipe(stack => lookaheadCount == 0 ? stack.Shift(symbol) : stack)
                 .Pipe(stack => stack.Reduce(reducedItem, out reducedToSymbol, out poppedLookaheads));
             
-            var resultPriorStates = priorStates
+            var resultPriorStateIds = priorStateIds
                 .PopSkip(reducedItem.Count - 1)
-                .Peek(out var goToState);
+                .Peek(out var goToStateId);
 
-            _observer.ReduceListener(parsingState, symbol, reducedItem, goToState.Id);
+            _observer.ReduceListener(parsingState, symbol, reducedItem, goToStateId);
 
             var resultParsingState = parsingState with
             {
                 ParsingStack = resultParsingStack,
-                PriorStates = resultPriorStates
+                PriorStateIds = resultPriorStateIds
             };
 
-            emitNext(reducedToSymbol);
-            poppedLookaheads.ForEach(emitNext);
+            var currentTransition = Automaton<Symbol<TSymbol>, ParsingState<TSymbol>>.CurrentTransition.Value;
+            currentTransition.YieldNext(reducedToSymbol);
+            poppedLookaheads.ForEach(currentTransition.YieldNext);
 
             if (lookaheadCount > 0)
-                emitNext(symbol);
+                currentTransition.YieldNext(symbol);
 
-            return new(resultParsingState, goToState.Some());
+            currentTransition.DynamiclyGoTo(goToStateId.Some());
+
+            return resultParsingState;
         };
     }
 
-    public ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> Accept(Symbol<TSymbol> symbol)
+    public Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> Accept()
     {
-        return automatonState =>
+        return (parsingState, symbol) =>
         {
-            var (parsingState, nextStateOption, _) = automatonState;
+            var nextStateOption = Automaton<Symbol<TSymbol>, ParsingState<TSymbol>>.CurrentTransition.Value.TransitsTo;
             var nextState = nextStateOption.ValueOrFailure();
             
             _observer.AcceptListener(parsingState, nextState.Id);

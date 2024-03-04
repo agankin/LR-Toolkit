@@ -4,7 +4,7 @@ namespace LRToolkit.Parsing;
 
 internal record State<TSymbol> where TSymbol : notnull
 {
-    private readonly State<Symbol<TSymbol>, ParsingState<TSymbol>> _dfaState = null!;
+    private readonly State<Symbol<TSymbol>, ParsingState<TSymbol>> _dfaState;
     private ItemSet<TSymbol> _fullItemSet;
 
     public required State<Symbol<TSymbol>, ParsingState<TSymbol>> DFAState
@@ -43,12 +43,9 @@ internal record State<TSymbol> where TSymbol : notnull
         return startState;
     }
 
-    public State<TSymbol> ToNewFixedState(
-        Symbol<TSymbol> symbolAhead,
-        ItemSet<TSymbol> fullItemSet,
-        ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> reduce)
+    public State<TSymbol> TransitsToNew(Symbol<TSymbol> symbol, ItemSet<TSymbol> fullItemSet, Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> reduce)
     {
-        var newDFAState = DFAState.ToNewFixedState(symbolAhead, reduce);
+        var newDFAState = DFAState.TransitsBy(symbol).WithReducingBy(reduce).ToNew();
         return this with
         {
             DFAState = newDFAState,
@@ -56,17 +53,17 @@ internal record State<TSymbol> where TSymbol : notnull
         };
     }
 
-    public void LinkFixedState(Symbol<TSymbol> symbolAhead, State<TSymbol> toState, ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> reduce) =>
-        DFAState.LinkFixedState(symbolAhead, toState.DFAState, reduce);
+    public void TransitsToExisting(Symbol<TSymbol> symbolAhead, State<TSymbol> toState, Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> reduce) =>
+        DFAState.TransitsBy(symbolAhead).WithReducingBy(reduce).To(toState.DFAState);
 
-    public void LinkDynamicState(Symbol<TSymbol> symbol, Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> reduce) =>
-        DFAState.LinkDynamic(symbol, reduce);
+    public void TransitsDynamicly(Symbol<TSymbol> symbol, Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> reduce) =>
+        DFAState.TransitsBy(symbol).Dynamicly().WithReducing(reduce);
 
     public AcceptedState<Symbol<TSymbol>, ParsingState<TSymbol>> ToNewFixedAccepted(
-        Symbol<TSymbol> symbol,
-        ReduceValue<Symbol<TSymbol>, ParsingState<TSymbol>> reduce)
+        Symbol<TSymbol> symbolAhead,
+        Reduce<Symbol<TSymbol>, ParsingState<TSymbol>> reduce)
     {
-        return DFAState.ToNewFixedAccepted(symbol, reduce);
+        return DFAState.TransitsBy(symbolAhead).WithReducingBy(reduce).ToAccepted();
     }
 
     public override string? ToString() => DFAState.ToString();

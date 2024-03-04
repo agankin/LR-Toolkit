@@ -58,7 +58,7 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
             Option.None<Parser<TSymbol>, BuilderError>,
             () => 
             {
-                var automaton = automatonBuilder.Build(c => c.TurnOffAnyReachesAcceptedValidation()).ValueOrFailure();
+                var automaton = automatonBuilder.Build(c => c.TurnOffAnyReachesAcceptedValidation()).Value.ValueOrFailure();
                 return new Parser<TSymbol>(automaton, startState).Some<Parser<TSymbol>, BuilderError>();
             });
     }

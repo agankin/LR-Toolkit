@@ -15,8 +15,6 @@ public class Parser<TSymbol> where TSymbol : notnull
         _startState = startState;
     }
 
-    public IState<Symbol<TSymbol>, ParsingState<TSymbol>> StartState => _automaton.Start;
-
     public Option<Symbol<TSymbol>, AutomatonError<Symbol<TSymbol>, ParsingState<TSymbol>>> Run(IEnumerable<Lexem<TSymbol>> lexems)
     {
         var endLexem = Symbol<TSymbol>.End();

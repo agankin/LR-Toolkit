@@ -5,15 +5,15 @@ namespace LRToolkit.Parsing;
 
 public record ParsingState<TSymbol>(
     ParsingStack<TSymbol> ParsingStack,
-    ImmutableStack<IState<Symbol<TSymbol>, ParsingState<TSymbol>>> PriorStates
+    ImmutableStack<uint> PriorStateIds
 )
 where TSymbol : notnull
 {
     internal static ParsingState<TSymbol> CreateNew(State<TSymbol> start)
     {
         var parsingStack = new ParsingStack<TSymbol>();
-        var priorStates = ImmutableStack<IState<Symbol<TSymbol>, ParsingState<TSymbol>>>.Empty.Push(start.DFAState);
+        var priorStateIds = ImmutableStack<uint>.Empty.Push(start.DFAState.Id);
 
-        return new ParsingState<TSymbol>(parsingStack, priorStates);
+        return new ParsingState<TSymbol>(parsingStack, priorStateIds);
     }
 }

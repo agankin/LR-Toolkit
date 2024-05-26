@@ -1,5 +1,4 @@
-﻿using Optional;
-using Optional.Unsafe;
+﻿using PureMonads;
 
 namespace LRToolkit.Utilities;
 
@@ -11,7 +10,7 @@ public static class OptionExtensions
     public static bool SomeEquals<TValue>(this Option<TValue> valueOption, TValue valueToCompare, IEqualityComparer<TValue>? comparer = null)
     {
         comparer = comparer ?? EqualityComparer<TValue>.Default;
-        return valueOption.Map(value => comparer.Equals(value, valueToCompare)).ValueOr(false);
+        return valueOption.Map(value => comparer.Equals(value, valueToCompare)).Or(false);
     }
 
     public static IEnumerable<TResult> SelectOnlySome<TItem, TResult>(this IEnumerable<TItem> items, Func<TItem, Option<TResult>> selector) =>

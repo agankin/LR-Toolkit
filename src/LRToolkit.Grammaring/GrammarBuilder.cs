@@ -1,4 +1,5 @@
-﻿using Optional.Collections;
+﻿using LRToolkit.Utilities;
+using PureMonads;
 
 namespace LRToolkit.Grammaring;
 
@@ -14,8 +15,8 @@ public class GrammarBuilder<TSymbol> where TSymbol : notnull
     {
         set
         {
-            var productions = _productions.GetValueOrNone(symbol)
-                .ValueOr(() => _productions[symbol] = new(symbol));
+            var productions = _productions.GetOrNone(symbol)
+                .Or(() => _productions[symbol] = new(symbol));
             
             var production = new ProductionRule<TSymbol>(symbol, value);
             productions.Add(production);

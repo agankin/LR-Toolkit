@@ -1,6 +1,6 @@
 using LRToolkit.Grammaring;
 using LRToolkit.Utilities;
-using Optional;
+using PureMonads;
 
 namespace LRToolkit.Parsing;
 
@@ -25,12 +25,12 @@ public class LALRItemSetMerger<TSymbol> : IItemSetMerger<TSymbol> where TSymbol 
 
     public int GetMergeableHashCode(ItemSet<TSymbol> itemSet) => Hash.FNV(itemSet, GetMergeableHashCode);
 
-    public Option<ItemSet<TSymbol>, BuilderError> Merge(ItemSet<TSymbol> first, ItemSet<TSymbol> second)
+    public Result<ItemSet<TSymbol>, BuilderError> Merge(ItemSet<TSymbol> first, ItemSet<TSymbol> second)
     {
         var kernels = first.Kernels.Concat(second.Kernels).ToHashSet();
         var closures = _closureProducer.Produce(kernels);
 
-        return new ItemSet<TSymbol>(kernels, closures).Some<ItemSet<TSymbol>, BuilderError>();
+        return new ItemSet<TSymbol>(kernels, closures);
     }
 
     private static bool IsMergeable(Item<TSymbol> first, Item<TSymbol> second) =>

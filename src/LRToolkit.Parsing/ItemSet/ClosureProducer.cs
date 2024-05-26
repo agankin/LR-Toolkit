@@ -1,6 +1,6 @@
 ﻿using LRToolkit.Grammaring;
 using LRToolkit.Utilities;
-using Optional;
+using PureMonads;
 
 namespace LRToolkit.Parsing;
 
@@ -19,7 +19,7 @@ internal class ClosureProducer<TSymbol> where TSymbol : notnull
     {
         var symbolAheadOption = GetAhead(kernelItem);
         var closures = symbolAheadOption.Map(symbolAhead => ProduceClosures(symbolAhead).ToHashSet())
-            .ValueOr(new HashSet<Item<TSymbol>>());
+            .Or(new HashSet<Item<TSymbol>>());
 
         return closures;
     }

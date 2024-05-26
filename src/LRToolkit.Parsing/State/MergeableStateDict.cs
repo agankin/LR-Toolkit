@@ -1,6 +1,5 @@
 ﻿using LRToolkit.Utilities;
-using Optional;
-using Optional.Collections;
+using PureMonads;
 
 namespace LRToolkit.Parsing;
 
@@ -14,7 +13,7 @@ internal class MergeableStateDict<TSymbol> where TSymbol : notnull
         _mergeableStates = new Dictionary<ItemSet<TSymbol>, State<TSymbol>>(comparer);
     }
 
-    public Option<State<TSymbol>> GetMergeableOrNone(ItemSet<TSymbol> itemSet) => _mergeableStates.GetValueOrNone(itemSet);
+    public Option<State<TSymbol>> GetMergeableOrNone(ItemSet<TSymbol> itemSet) => _mergeableStates.GetOrNone(itemSet);
 
     public void AddNew(State<TSymbol> state, ItemSet<TSymbol> itemSet) => _mergeableStates.Add(itemSet, state);
 }

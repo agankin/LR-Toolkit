@@ -1,8 +1,7 @@
 ﻿using LRToolkit.Grammaring;
 using DFAutomaton;
-using Optional;
-using Optional.Unsafe;
 using LRToolkit.Utilities;
+using PureMonads;
 
 namespace LRToolkit.Parsing;
 
@@ -33,7 +32,7 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
         _stateBuilder = new StateForStepBuilder<TSymbol>(BuildNextStates, _itemSetMerger, _observer);
     }
 
-    public static Option<Parser<TSymbol>, BuilderError> Build(
+    public static Result<Parser<TSymbol>, BuilderError> Build(
         Grammar<TSymbol> grammar,
         ILRParserBuilderBehavior<TSymbol> parserBuilderBehavior,
         Func<ParserTransitionsObserver<TSymbol>, ParserTransitionsObserver<TSymbol>>? configureObserver = null)
@@ -46,7 +45,7 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
         return builder.Build();
     }
 
-    private Option<Parser<TSymbol>, BuilderError> Build()
+    private Result<Parser<TSymbol>, BuilderError> Build()
     {
         var automatonBuilder = AutomatonBuilder<Symbol<TSymbol>, ParsingState<TSymbol>>.Create();
         var startItemSet = CreateStartItemSet();
@@ -55,7 +54,7 @@ public class ParserBuilder<TSymbol> where TSymbol : notnull
         var error = BuildNextStates(startState);
 
         return error.Match(
-            Option.None<Parser<TSymbol>, BuilderError>,
+            Result.Error<Parser<TSymbol>, BuilderError>,
             () => 
             {
                 var automaton = automatonBuilder.Build(c => c.TurnOffAnyReachesAcceptedValidation()).Value.ValueOrFailure();

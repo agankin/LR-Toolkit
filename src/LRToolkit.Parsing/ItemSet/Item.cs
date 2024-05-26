@@ -1,7 +1,6 @@
 ﻿using LRToolkit.Grammaring;
 using LRToolkit.Utilities;
-using Optional;
-using Optional.Collections;
+using PureMonads;
 
 namespace LRToolkit.Parsing;
 

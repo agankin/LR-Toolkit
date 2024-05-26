@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using LRToolkit.Utilities;
-using Optional;
+using PureMonads;
 
 namespace LRToolkit.Parsing;
 
@@ -15,7 +15,7 @@ internal class OneLookahead<TSymbol> : ILookahead<TSymbol>, IEquatable<OneLookah
     public int Count => 1;
 
     public Option<Symbol<TSymbol>> this[int index] => index == 0
-        ? _symbol.Some()
+        ? _symbol
         : Option.None<Symbol<TSymbol>>();
 
     public IEnumerator<Symbol<TSymbol>> GetEnumerator() => new OneEnumerator<Symbol<TSymbol>>(_symbol);

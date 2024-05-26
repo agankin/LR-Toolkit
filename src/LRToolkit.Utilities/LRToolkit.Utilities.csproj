@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Optional" Version="4.0.0" />
+    <Reference Include="PureMonads">
+      <HintPath>..\..\lib\PureMonads.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

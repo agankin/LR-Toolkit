@@ -1,9 +1,7 @@
 ﻿using System.Collections.Immutable;
 using LRToolkit.Lexing;
 using LRToolkit.Utilities;
-using Optional;
-using Optional.Unsafe;
-
+using PureMonads;
 namespace LRToolkit.Parsing;
 
 public sealed record Symbol<TSymbol> where TSymbol : notnull
@@ -55,7 +53,7 @@ public sealed record Symbol<TSymbol> where TSymbol : notnull
     {
         return Type switch
         {
-            SymbolType.Symbol => Value.Map(value => value.ToString()).ValueOr("NONE"),
+            SymbolType.Symbol => Value.Map(value => value.ToString()).Or("NONE"),
             SymbolType.Lookahead => Value.ValueOrFailure().ToString(),
             SymbolType.End => "$",
             _ => throw new UnsupportedEnumValueException<SymbolType>(Type)

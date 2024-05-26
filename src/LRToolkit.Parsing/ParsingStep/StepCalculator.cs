@@ -1,5 +1,4 @@
-﻿using LRToolkit.Utilities;
-using Optional;
+﻿using PureMonads;
 
 namespace LRToolkit.Parsing;
 
@@ -12,7 +11,7 @@ internal class StepCalculator<TSymbol> where TSymbol : notnull
         _closureProducer = closureProducer;
     }
 
-    public Option<Step<TSymbol>, BuilderError> GetStep(ItemSet<TSymbol> itemSet, Symbol<TSymbol> symbolAhead)
+    public Result<Step<TSymbol>, BuilderError> GetStep(ItemSet<TSymbol> itemSet, Symbol<TSymbol> symbolAhead)
     {
         var afterStepForward = GetStepForwardItemSet(itemSet, symbolAhead);
         var stepItemSet = new StepItemSet<TSymbol>(afterStepForward);
@@ -53,17 +52,17 @@ internal class StepCalculator<TSymbol> where TSymbol : notnull
         return next;
     }
 
-    private static Option<Nothing, BuilderError> Validate(StepItemSet<TSymbol> stepItemSet)
+    private static Result<Nothing, BuilderError> Validate(StepItemSet<TSymbol> stepItemSet)
     {
         var (shiftItems, reduceItems) = (stepItemSet.ShiftItems, stepItemSet.ReduceItems);
 
         if (shiftItems.Any() && reduceItems.Any())
-            return Option.None<Nothing, BuilderError>(BuilderError.ShiftReduceConflict);
+            return BuilderError.ShiftReduceConflict;
 
         var reducedSymbols = reduceItems.Select(item => item.ForSymbol).Distinct();
         if (reducedSymbols.Count() > 1)
-            return Option.None<Nothing, BuilderError>(BuilderError.ReduceConflict);
+            return BuilderError.ReduceConflict;
 
-        return new Nothing().Some<Nothing, BuilderError>();
+        return new Nothing();
     }
 }

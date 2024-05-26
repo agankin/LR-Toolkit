@@ -1,4 +1,4 @@
-﻿using Optional;
+﻿using PureMonads;
 
 namespace LRToolkit.Lexing;
 
@@ -18,6 +18,6 @@ public static class ParsingChainBuilder
         {
             var lexem = parser.Invoke(input);
 
-            return lexem.Map(Option.Some).ValueOr(() => chain(input));
+            return lexem.Map(Option.Some).Or(() => chain(input));
         };
 }

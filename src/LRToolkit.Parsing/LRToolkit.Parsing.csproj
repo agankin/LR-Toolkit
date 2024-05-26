@@ -7,18 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Optional" Version="4.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\LRToolkit.Grammaring\LRToolkit.Grammaring.csproj" />
     <ProjectReference Include="..\LRToolkit.Lexing\LRToolkit.Lexing.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="DFAutomaton">
-      <HintPath>..\..\Dependencies\DFAutomaton.dll</HintPath>
+    <Reference Include="PureMonads">
+      <HintPath>..\..\lib\PureMonads.dll</HintPath>
     </Reference>
+	  <Reference Include="DFAutomaton">
+	    <HintPath>..\..\lib\DFAutomaton.dll</HintPath>
+	  </Reference>
   </ItemGroup>
 
 </Project>

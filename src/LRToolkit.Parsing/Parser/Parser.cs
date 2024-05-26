@@ -1,6 +1,6 @@
 ﻿using DFAutomaton;
 using LRToolkit.Lexing;
-using Optional;
+using PureMonads;
 
 namespace LRToolkit.Parsing;
 
@@ -15,7 +15,7 @@ public class Parser<TSymbol> where TSymbol : notnull
         _startState = startState;
     }
 
-    public Option<Symbol<TSymbol>, AutomatonError<Symbol<TSymbol>, ParsingState<TSymbol>>> Run(IEnumerable<Lexem<TSymbol>> lexems)
+    public Result<Symbol<TSymbol>, AutomatonError<Symbol<TSymbol>, ParsingState<TSymbol>>> Run(IEnumerable<Lexem<TSymbol>> lexems)
     {
         var endLexem = Symbol<TSymbol>.End();
         var startValue = ParsingState<TSymbol>.CreateNew(_startState);

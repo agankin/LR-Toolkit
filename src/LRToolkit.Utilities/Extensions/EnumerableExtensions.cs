@@ -1,4 +1,6 @@
-﻿namespace LRToolkit.Utilities;
+﻿using PureMonads;
+
+namespace LRToolkit.Utilities;
 
 public static class EnumerableExtensions
 {

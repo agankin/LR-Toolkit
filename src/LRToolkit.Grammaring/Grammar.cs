@@ -1,4 +1,5 @@
-﻿using Optional.Collections;
+﻿using LRToolkit.Utilities;
+using PureMonads;
 
 namespace LRToolkit.Grammaring;
 
@@ -15,5 +16,5 @@ public class Grammar<TSymbol>
     public TSymbol Start { get; }
 
     public IReadOnlyList<ProductionRule<TSymbol>> this[TSymbol symbol] =>
-        _productions.GetValueOrNone(symbol).ValueOr(new ProductionRuleCollection<TSymbol>(symbol));
+        _productions.GetOrNone(symbol).Or(new ProductionRuleCollection<TSymbol>(symbol));
 }

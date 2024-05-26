@@ -1,4 +1,4 @@
-using Optional;
+using PureMonads;
 
 namespace LRToolkit.Parsing;
 
@@ -8,5 +8,5 @@ public interface IItemSetMerger<TSymbol> where TSymbol : notnull
 
     int GetMergeableHashCode(ItemSet<TSymbol> itemSet);
 
-    Option<ItemSet<TSymbol>, BuilderError> Merge(ItemSet<TSymbol> first, ItemSet<TSymbol> second);
+    Result<ItemSet<TSymbol>, BuilderError> Merge(ItemSet<TSymbol> first, ItemSet<TSymbol> second);
 }

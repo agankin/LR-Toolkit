@@ -1,7 +1,6 @@
 ﻿using DFAutomaton;
 using LRToolkit.Utilities;
-using Optional;
-using Optional.Unsafe;
+using PureMonads;
 
 namespace LRToolkit.Parsing;
 

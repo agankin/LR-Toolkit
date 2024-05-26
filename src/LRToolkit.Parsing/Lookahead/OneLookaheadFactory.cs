@@ -1,6 +1,5 @@
 ﻿using LRToolkit.Grammaring;
-using Optional;
-using Optional.Unsafe;
+using PureMonads;
 
 namespace LRToolkit.Parsing;
 
@@ -15,7 +14,7 @@ public class OneLookaheadFactory<TSymbol> : ILookaheadFactory<TSymbol> where TSy
     public ILookahead<TSymbol> GetForStart() => new OneLookahead<TSymbol>(Symbol<TSymbol>.End());
 
     public Option<ILookahead<TSymbol>> GetAhead(Item<TSymbol> item) =>
-        item.GetSymbolAhead(LookaheadIdx).Map<ILookahead<TSymbol>>(symbol => new OneLookahead<TSymbol>(symbol));
+        item.GetSymbolAhead(LookaheadIdx).Map(symbol => new OneLookahead<TSymbol>(symbol));
 
     public IEnumerable<ILookahead<TSymbol>> Produce(ILookahead<TSymbol> lookahead)
     {
@@ -29,7 +28,7 @@ public class OneLookaheadFactory<TSymbol> : ILookaheadFactory<TSymbol> where TSy
 
         var producedLookaheads = lookaheadSymbol.Value
             .Map(ProduceLookaheads)
-            .ValueOr(Enumerable.Empty<ILookahead<TSymbol>>);
+            .Or(Enumerable.Empty<ILookahead<TSymbol>>);
             
         return producedLookaheads.Prepend(lookahead);
     }

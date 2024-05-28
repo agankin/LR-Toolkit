@@ -7,14 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Pure-Monads" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LRToolkit.Grammaring\LRToolkit.Grammaring.csproj" />
     <ProjectReference Include="..\LRToolkit.Lexing\LRToolkit.Lexing.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="PureMonads">
-      <HintPath>..\..\lib\PureMonads.dll</HintPath>
-    </Reference>
 	  <Reference Include="DFAutomaton">
 	    <HintPath>..\..\lib\DFAutomaton.dll</HintPath>
 	  </Reference>

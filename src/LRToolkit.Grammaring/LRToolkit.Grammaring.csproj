@@ -7,13 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LRToolkit.Utilities\LRToolkit.Utilities.csproj" />
+    <PackageReference Include="Pure-Monads" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="PureMonads">
-      <HintPath>..\..\lib\PureMonads.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\LRToolkit.Utilities\LRToolkit.Utilities.csproj" />
   </ItemGroup>
 
 </Project>
